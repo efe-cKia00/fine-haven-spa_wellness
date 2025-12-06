@@ -36,3 +36,63 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+.aboreto-regular {
+    font-family: "Aboreto", system-ui;
+    font-weight: 400;
+    font-style: normal;
+}
+/* Full-screen responsive background with overlay and content on top */
+.hero {
+    min-height: 100vh; /* fill viewport height */
+    width: 100%;
+    background-image: url('/homepage.jpg'); /* <-- replace path if needed */
+    background-size: cover; /* auto-adjust to fill screen while preserving aspect */
+    background-position: center center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center; /* vertical centering of content */
+    justify-content: center; /* horizontal centering */
+    position: relative;
+    color: #fff; /* default text color for contrast */
+}
+
+    /* optional dark overlay so text is readable on varied images */
+    .hero::before {
+        content: "";
+        position: absolute;
+        inset: 0; /* shorthand for top:0; right:0; bottom:0; left:0; */
+        background: rgba(0,0,0,0.35); /* tweak opacity (0 = transparent, 1 = solid) */
+        pointer-events: none;
+    }
+
+/* content stays above overlay */
+.hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 1.5rem;
+    max-width: 900px; /* optional, keeps lines readable */
+}
+
+/* simple link/button style */
+.hero-link {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: .6rem 1rem;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.18);
+}
+
+/* accessible sizing on small screens */
+@media (max-width: 600px) {
+    .hero-content {
+        padding: 1rem;
+    }
+
+    .hero h1 {
+        font-size: 1.6rem;
+    }
+}
