@@ -1,3 +1,7 @@
+html {
+    scroll-behavior: smooth;
+}
+
 h1:focus {
     outline: none;
 }
@@ -20,9 +24,9 @@ h1:focus {
     color: white;
 }
 
-    .blazor-error-boundary::after {
-        content: "An error has occurred."
-    }
+.blazor-error-boundary::after {
+    content: "An error has occurred."
+}
 
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
@@ -36,13 +40,80 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
-.aboreto-regular {
+
+/* -------------- ALL CUSTOM HOMEPAGE FONTS START WITH "HP" -------------------- */
+
+.hp-ico {
+    height: 20px;
+    width: auto;
+}
+
+.hp-font-white {
     font-family: "Aboreto", system-ui;
     font-weight: 400;
     font-style: normal;
 }
+
+.hp-font-black {
+    font-family: "Aboreto", system-ui;
+    font-weight: 400;
+    font-style: normal;
+    color: black;
+}
+
+/* simple link/button style */
+.hp-link-white {
+    display: inline-block;
+    padding: .6rem 1rem;
+    background: rgba(255,255,255,0.12);
+    color: #ffff;
+    text-decoration: none;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.18);
+}
+
+.hp-link-black {
+    display: inline-block;
+    padding: .6rem 1rem;
+    background: #49392D;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    border: 1px #49392D;
+}
+
+/* Sign-in button positioned over hero (top-right) */
+/* reuses existing .signin-btn visual styles and adds positioning for hero */
+.hp-signin {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    z-index: 3; /* above overlay and content */
+    display: inline-block;
+    margin-top: 1rem;
+    padding: .6rem 1rem;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.18);
+}
+
+.hp-footer {
+    padding: 50px;
+    background: #58595B;
+    margin: 0px;
+}
+
+.hp-location {
+    background: #404143;
+    width: 100%;
+    margin: 0px;
+    color: aliceblue;
+}
+
 /* Full-screen responsive background with overlay and content on top */
-.hero {
+.hp-homepage {
     min-height: 100vh; /* fill viewport height */
     width: 100%;
     background-image: url('/homepage.jpg'); /* <-- replace path if needed */
@@ -56,17 +127,17 @@ h1:focus {
     color: #fff; /* default text color for contrast */
 }
 
-    /* optional dark overlay so text is readable on varied images */
-    .hero::before {
-        content: "";
-        position: absolute;
-        inset: 0; /* shorthand for top:0; right:0; bottom:0; left:0; */
-        background: rgba(0,0,0,0.35); /* tweak opacity (0 = transparent, 1 = solid) */
-        pointer-events: none;
-    }
+/* optional dark overlay so text is readable on varied images */
+.hp-homepage::before {
+    content: "";
+    position: absolute;
+    inset: 0; /* shorthand for top:0; right:0; bottom:0; left:0; */
+    background: rgba(0,0,0,0.35); /* tweak opacity (0 = transparent, 1 = solid) */
+    pointer-events: none;
+}
 
 /* content stays above overlay */
-.hero-content {
+.hp-homepage-content {
     position: relative;
     z-index: 1;
     text-align: center;
@@ -74,25 +145,50 @@ h1:focus {
     max-width: 900px; /* optional, keeps lines readable */
 }
 
-/* simple link/button style */
-.hero-link {
-    display: inline-block;
-    margin-top: 1rem;
-    padding: .6rem 1rem;
-    background: rgba(255,255,255,0.12);
-    color: #fff;
-    text-decoration: none;
-    border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.18);
+.hp-body {
+    background-color: #F6EEE5;
 }
 
 /* accessible sizing on small screens */
 @media (max-width: 600px) {
-    .hero-content {
+    .hp-homepage-content {
         padding: 1rem;
     }
 
-    .hero h1 {
+    .hp-homepage h1 {
         font-size: 1.6rem;
+    }
+}
+
+/* Logo positioned over hero (top-left) */
+.hp-logo {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 3; /* above overlay and content */
+    display: block;
+}
+
+.hp-logo img {
+    height: 120px;
+    width: auto;
+    display: block;
+    margin: 0;
+}
+
+/* Slightly reduce sizes on small screens */
+@media (max-width: 600px) {
+    .hp-logo img {
+        height: 40px;
+    }
+
+    .hp-signin {
+        top: 10px;
+        right: 12px;
+    }
+
+    .hp-signin-btn {
+        padding: 6px 10px;
+        font-size: 0.95rem;
     }
 }
