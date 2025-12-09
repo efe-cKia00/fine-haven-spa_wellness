@@ -14,6 +14,18 @@ namespace CS212FinalProject.Data
         {
         }
 
-        public DbSet<CS212FinalProject.Models.User> User { get; set; } = default!;
+        // single, idiomatic DbSet name
+        public DbSet<User> Users { get; set; } = null!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Persist Role enum as string and set DB default to "Customer"
+            modelBuilder.Entity<User>()
+                .Property(u => u.Role)
+                .HasConversion<string>()
+                .HasDefaultValue(RoleType.Customer);
+
+            // other model configuration...
+        }
     }
 }

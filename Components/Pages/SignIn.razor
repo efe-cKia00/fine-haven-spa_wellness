@@ -1,47 +1,81 @@
-﻿@page "/signin"
+﻿@page "/sign-in"
+@inject NavigationManager NavigationManager
+@inject IAuthService SignInService
+
 @using System.ComponentModel.DataAnnotations
+
 
 <PageTitle>Sign In</PageTitle>
 
 <div class="hp-signin-page">
-    <div class="hp-signin-container">
-        <h2 class="mb-3">Sign In</h2>
+  <div class="hp-signin-container">
+    <h2 class="mb-3">Sign In</h2>
 
-        <EditForm Model="@model" OnValidSubmit="HandleValidSubmit">
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" />
+    @if (!string.IsNullOrEmpty(Message))
+    {
+      <div class="alert alert-danger" role="alert">@Message</div>
+    }
 
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <InputText id="email" class="form-control" @bind-Value="model.Email" />
-                <ValidationMessage For="@(() => model.Email)" class="text-danger" />
-            </div>
+    <EditForm Model="@model" OnValidSubmit="HandleValidSubmit">
+      <DataAnnotationsValidator />
+      <ValidationSummary class="text-danger" />
 
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <InputText id="password" type="password" class="form-control" @bind-Value="model.Password" />
-                <ValidationMessage For="@(() => model.Password)" class="text-danger" />
-            </div>
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <InputText id="email" class="form-control" @bind-Value="model.Email" />
+        <ValidationMessage For="@(() => model.Email)" class="text-danger" />
+      </div>
 
-            <div>
-                <p>Don't have an account? <a href="@($"/CreateAccount")">Create an account</a></p>
-            </div>
-
-            <div class="d-flex justify-content-between align-items-center">
-                <a href="/create-account" class="hp-link-black">Sign in</a>
-                <button type="submit" class="hp-link-white">Sign in</button>
-            </div>
-        </EditForm>
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-group">
+            <InputText id="password" type="@(showPassword ? "text" : "password")" class="form-control" @bind-Value="model.Password" />
+            <span class="input-group-text">
+                <input type="checkbox" @bind="showPassword" aria-label="Show password" /> Show
+            </span>
+        </div>    
+        <ValidationMessage For="@(() => model.Password)" class="text-danger" />
     </div>
+
+      <div class="mb-3">
+                <p>Don't have an account? <a href="@($"/create-account")" class="">Create account</a></p>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center">
+        <a href="/CreateAccount" class="hp-link-black">Create account</a>
+        <button class="hp-link-white" type="submit" disabled="@isSubmitting">
+          @(isSubmitting ? "Signing in..." : "Sign in")
+        </button>
+      </div>
+    </EditForm>
+  </div>
 </div>
 
 @code {
     private SignInModel model = new();
+    private bool isSubmitting = false;
+    private string? Message = null;
+    private bool showPassword;
 
-    private void HandleValidSubmit()
+    private async Task HandleValidSubmit()
     {
-        // TODO: replace with real sign-in logic
-        Console.WriteLine($"Sign-in attempt for {model.Email}");
+        isSubmitting = true;
+        Message = null;
+
+        // Simulate a sign-in process
+        var result = await SignInService.SignInAsync(model.Email!, model.Password!);
+
+        if (result)
+        {
+            // TODO: Navigate to the appropriate page after successful sign-in
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            Message = "Sign in failed. Please check your credentials.";
+        }
+
+        isSubmitting = false;
     }
 
     private class SignInModel

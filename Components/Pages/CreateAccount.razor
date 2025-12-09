@@ -1,64 +1,127 @@
-﻿@page "/CreateAccount"
+﻿@page "/create-account"
+@inject NavigationManager NavigationManager
+@inject IAuthService AuthService
+
 @using System.ComponentModel.DataAnnotations
+@using CS212FinalProject.Models
+@using CS212FinalProject.Data
+@using Microsoft.EntityFrameworkCore
+@using Shared.Services
+
 
 <PageTitle>Create Account</PageTitle>
 
 <div class="hp-signin-page">
-    <div class="hp-signin-container">
-        <h2 class="mb-3">Create an account</h2>
+  <div class="hp-signin-container">
+    <h2 class="mb-3">Create an account</h2>
 
-        <EditForm Model="@model" OnValidSubmit="HandleValidSubmit">
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" />
+    @if (!string.IsNullOrEmpty(Message))
+    {
+      <div class="alert @(IsSuccess ? "alert-success" : "alert-danger")" role="alert">@Message</div>
+    }
 
-            <div class="mb-3">
-                <label for="firstname" class="form-label">First Name</label>
-                <InputText typeof="text" id="firstname" class="form-control" />
-                <ValidationMessage For="@(() => model.Email)" class="text-danger" />
-            </div>
+    <EditForm Model="@model" OnValidSubmit="HandleValidSubmit">
+      <DataAnnotationsValidator />
+      <ValidationSummary class="text-danger" />
 
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <InputText id="email" class="form-control" @bind-Value="model.Email" />
-                <ValidationMessage For="@(() => model.Email)" class="text-danger" />
-            </div>
+      <div class="mb-3">
+        <label for="firstname" class="form-label">First name</label>
+        <InputText id="firstname" class="form-control" @bind-Value="model.FirstName" />
+        <ValidationMessage For="@(() => model.FirstName)" class="text-danger" />
+      </div>
 
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <InputText id="password" type="password" class="form-control" @bind-Value="model.Password" />
-                <ValidationMessage For="@(() => model.Password)" class="text-danger" />
-            </div>
+      <div class="mb-3">
+        <label for="lastname" class="form-label">Last name</label>
+        <InputText id="lastname" class="form-control" @bind-Value="model.LastName" />
+        <ValidationMessage For="@(() => model.LastName)" class="text-danger" />
+      </div>
 
-            <div>
-                <p>Don't have an account? <a href="@($"/CreateAccount")">Create an account</a></p>
-            </div>
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <InputText id="email" class="form-control" @bind-Value="model.Email" />
+        <ValidationMessage For="@(() => model.Email)" class="text-danger" />
+      </div>
 
-            <div class="d-flex justify-content-between align-items-center">
-                <a href="/create-account" class="hp-link-black">Sign in</a>
-                <button type="submit" class="hp-link-white">Sign in</button>
-            </div>
-        </EditForm>
-    </div>
+      <div class="mb-3">
+        <label for="phone" class="form-label">Phone</label>
+        <InputText id="phone" class="form-control" @bind-Value="model.PhoneNumber" />
+        <ValidationMessage For="@(() => model.PhoneNumber)" class="text-danger" />
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <div class="input-group">
+          <InputText id="password" type="@(showPassword ? "text" : "password")" class="form-control" @bind-Value="model.Password" />
+          <span class="input-group-text">
+            <input type="checkbox" @bind="showPassword" aria-label="Show password" /> Show
+          </span>
+        </div>
+        <ValidationMessage For="@(() => model.Password)" class="text-danger" />
+      </div>
+
+      <p><a href="/sign-in">Already have an account? Sign in</a></p>
+
+      <div class="d-flex justify-content-between align-items-center">
+        <a href="/signin" class="hp-link-black">Create</a>
+        <button class="hp-link-white" type="submit" disabled="@isSubmitting">
+          @(isSubmitting ? "Creating..." : "Create account")
+        </button>
+      </div>
+    </EditForm>
+  </div>
 </div>
 
 @code {
+    private CreateAccountModel model = new();
+    private bool isSubmitting = false;
+    private string? Message;
+    private bool IsSuccess;
+    private bool showPassword;
 
-    private SignInModel model = new();
-
-    private void HandleValidSubmit()
+    private async Task HandleValidSubmit()
     {
-        // TODO: replace with real sign-in logic
-        Console.WriteLine($"Sign-in attempt for {model.Email}");
+        isSubmitting = true;
+        Message = null;
+        IsSuccess = false;
+
+        // Ensure AuthService.CreateAccountAsync signature matches these parameters.
+        var created = await AuthService.CreateAccountAsync(
+            model.FirstName?.Trim() ?? string.Empty,
+            model.LastName?.Trim() ?? string.Empty,
+            model.Email?.Trim() ?? string.Empty,
+            model.PhoneNumber?.Trim() ?? string.Empty,
+            model.Password ?? string.Empty);
+
+        if (created)
+        {
+            IsSuccess = true;
+            Message = "Account created successfully. Redirecting to sign in...";
+            await Task.Delay(700);
+            NavigationManager.NavigateTo("/sign-in");
+        }
+        else
+        {
+            Message = "Account could not be created. Email may already be registered.";
+        }
+
+        isSubmitting = false;
     }
 
-    private class SignInModel
+    private class CreateAccountModel
     {
-        [Required]
-        [EmailAddress]
+        [Required, MaxLength(50)]
+        public string? FirstName { get; set; }
+
+        [Required, MaxLength(50)]
+        public string? LastName { get; set; }
+
+        [Required, EmailAddress, MaxLength(256)]
         public string? Email { get; set; }
 
-        [Required]
-        [MinLength(6)]
+        [Required, Phone, MaxLength(30)]
+        public string? PhoneNumber { get; set; }
+
+        [Required, MinLength(6)]
         public string? Password { get; set; }
     }
 }

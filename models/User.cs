@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CS212FinalProject.Models
 {
@@ -8,24 +7,25 @@ namespace CS212FinalProject.Models
         [Key]
         public int Id { get; set; }
 
-        [Required]
-        [StringLength(25)]
+        [Required, MaxLength(50)]
         public string FirstName { get; set; } = string.Empty;
 
-        [Required]
-        [StringLength(25)]
+        [Required, MaxLength(50)]
         public string LastName { get; set; } = string.Empty;
 
-        [Required]
-        [StringLength(25), RegularExpression(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")]
+        [Required, EmailAddress, MaxLength(256)]
         public string Email { get; set; } = string.Empty;
 
-        [Required]
-        [StringLength(10), RegularExpression(@"^\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}$")]
-        public decimal PhoneNumber { get; set; }
+        // Store phone numbers as strings to preserve formatting and international numbers
+        [MaxLength(30)]
+        public string PhoneNumber { get; set; } = string.Empty;
 
+        // Use the RoleType enum. EF Core will persist this as a string via configuration.
         [Required]
-        [StringLength(10), RegularExpression(@"^(Customer|ServiceProvider|Receptionist|Manager)$")]
-        public string Role { get; set; } = string.Empty;
+        public RoleType Role { get; set; } = RoleType.Customer;
+
+        // Store only hashed password values
+        [Required]
+        public string PasswordHash { get; set; } = string.Empty;
     }
 }

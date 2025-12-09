@@ -15,8 +15,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
-    <Folder Include="Models\" />
-    <Folder Include="Data\" />
+    <Folder Include="Components\Pages\Dashboard\" />
+    <Folder Include="Components\Pages\UserPages\" />
   </ItemGroup>
 
 </Project>
