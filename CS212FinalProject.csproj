@@ -7,6 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\Pages\Dashboard\**" />
+    <Compile Remove="Components\Pages\UserPages\**" />
+    <Content Remove="Components\Pages\Dashboard\**" />
+    <Content Remove="Components\Pages\UserPages\**" />
+    <EmbeddedResource Remove="Components\Pages\Dashboard\**" />
+    <EmbeddedResource Remove="Components\Pages\UserPages\**" />
+    <None Remove="Components\Pages\Dashboard\**" />
+    <None Remove="Components\Pages\UserPages\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
@@ -15,8 +26,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
-    <Folder Include="Components\Pages\Dashboard\" />
-    <Folder Include="Components\Pages\UserPages\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>
