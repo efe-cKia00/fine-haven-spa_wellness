@@ -11,7 +11,7 @@ public class SeedData
                 DbContextOptions<CS212FinalProjectContext>>());
 
         // Check if any of the database context variable(s) are null. They shouldn't be.
-        if (context == null || context.Users == null || context.Services == null || context.Appointments == null)
+        if (context == null || context.Users == null || context.Services == null)
         {
             throw new NullReferenceException(
                 "Null CS212FinalProjectContext or Users DbSet");
@@ -66,28 +66,28 @@ public class SeedData
             new Service
             {
                 Name = "Massage",
-                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Assumenda enim rerum laboriosam. Culpa, iusto? Accusamus quasi corporis facilis fugit similique, dolorum recusandae cupiditate nobis mollitia, deleniti aspernatur, quo veritatis rem? Sed quaerat, placeat eaque at voluptate itaque odit sint libero modi, maiores delectus qui magni.",
+                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit.",
                 Price = 20,
                 IsAvailable = true,
             },
             new Service
             {
                 Name = "Beard Trim",
-                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Assumenda enim rerum laboriosam. Culpa, iusto? Accusamus quasi corporis facilis fugit similique, dolorum recusandae cupiditate nobis mollitia, deleniti aspernatur, quo veritatis rem? Sed quaerat, placeat eaque at voluptate itaque odit sint libero modi, maiores delectus qui magni.",
+                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit.",
                 Price = 15,
                 IsAvailable = true,
             },
             new Service
             {
                 Name = "Deep Tissue Massage",
-                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Assumenda enim rerum laboriosam. Culpa, iusto? Accusamus quasi corporis facilis fugit similique, dolorum recusandae cupiditate nobis mollitia, deleniti aspernatur, quo veritatis rem? Sed quaerat, placeat eaque at voluptate itaque odit sint libero modi, maiores delectus qui magni.",
+                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit.",
                 Price = 10,
                 IsAvailable = false,
             },
             new Service
             {
                 Name = "Facial",
-                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Assumenda enim rerum laboriosam. Culpa, iusto? Accusamus quasi corporis facilis fugit similique, dolorum recusandae cupiditate nobis mollitia, deleniti aspernatur, quo veritatis rem? Sed quaerat, placeat eaque at voluptate itaque odit sint libero modi, maiores delectus qui magni.",
+                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit.",
                 Price = 25,
                 IsAvailable = true,
             }

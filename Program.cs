@@ -21,8 +21,7 @@ builder.Services.AddQuickGridEntityFrameworkAdapter();
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Add authentication for users as cookies
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
 
 // Add http context accessor
 builder.Services.AddHttpContextAccessor();
@@ -31,6 +30,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddCascadingAuthenticationState();
 
 var app = builder.Build();
 
