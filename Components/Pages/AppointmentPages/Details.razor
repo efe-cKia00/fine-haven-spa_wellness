@@ -1,0 +1,55 @@
+﻿@page "/appointments/details"
+@using Microsoft.EntityFrameworkCore
+@using CS212FinalProject.Models
+@inject IDbContextFactory<CS212FinalProject.Data.CS212FinalProjectContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Appointment</h2>
+    <hr />
+    @if (AppointmentModel is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <dl class="row">
+            <dt class="col-sm-2">ServiceProviderId</dt>
+            <dd class="col-sm-10">@AppointmentModel.ServiceProviderId</dd>
+            <dt class="col-sm-2">CustomerId</dt>
+            <dd class="col-sm-10">@AppointmentModel.CustomerId</dd>
+            <dt class="col-sm-2">ServiceId</dt>
+            <dd class="col-sm-10">@AppointmentModel.ServiceId</dd>
+            <dt class="col-sm-2">DateAndTime</dt>
+            <dd class="col-sm-10">@AppointmentModel.DateAndTime</dd>
+            <dt class="col-sm-2">Status</dt>
+            <dd class="col-sm-10">@AppointmentModel.Status</dd>
+        </dl>
+        <div>
+            <a href="@($"/appointments/edit?id={AppointmentModel.Id}")">Edit</a> |
+            <a href="@($"/appointments")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private CS212FinalProject.Models.Appointment? AppointmentModel;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        AppointmentModel = await context.Appointments.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (AppointmentModel is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

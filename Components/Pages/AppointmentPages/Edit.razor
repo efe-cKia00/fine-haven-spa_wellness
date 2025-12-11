@@ -1,0 +1,126 @@
+﻿@page "/appointments/edit"
+@using Microsoft.EntityFrameworkCore
+@using CS212FinalProject.Models
+@inject IDbContextFactory<CS212FinalProject.Data.CS212FinalProjectContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Appointment</h2>
+<hr />
+@if (AppointmentModel is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="AppointmentModel" OnValidSubmit="UpdateAppointment" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert" />
+
+                @* Use AppointmentModel.Id *@
+                <input type="hidden" name="AppointmentModel.Id" value="@AppointmentModel.Id" />
+
+                <div class="mb-3">
+                    <label for="serviceproviderid" class="form-label">ServiceProviderId:</label>
+                    <InputNumber id="serviceproviderid" @bind-Value="AppointmentModel.ServiceProviderId" class="form-control" />
+                    <ValidationMessage For="() => AppointmentModel.ServiceProviderId" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <span class="text-danger">*</span>
+                    <label for="customerid" class="form-label">CustomerId:</label>
+                    <InputNumber id="customerid" @bind-Value="AppointmentModel.CustomerId" class="form-control" aria-required="true" />
+                    <ValidationMessage For="() => AppointmentModel.CustomerId" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <span class="text-danger">*</span>
+                    <label for="serviceid" class="form-label">ServiceId:</label>
+                    <InputNumber id="serviceid" @bind-Value="AppointmentModel.ServiceId" class="form-control" aria-required="true" />
+                    <ValidationMessage For="() => AppointmentModel.ServiceId" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <span class="text-danger">*</span>
+                    <label for="dateandtime" class="form-label">DateAndTime:</label>
+                    @* Added Type="DateTimeLocal" *@
+                    <InputDate Type="InputDateType.DateTimeLocal" id="dateandtime" @bind-Value="AppointmentModel.DateAndTime" class="form-control" aria-required="true" />
+                    <ValidationMessage For="() => AppointmentModel.DateAndTime" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <span class="text-danger">*</span>
+                    <label for="status" class="form-label">Status:</label>
+                    @* CHANGED: InputText -> InputSelect for Enum *@
+                    <InputSelect id="status" @bind-Value="AppointmentModel.Status" class="form-control" aria-required="true">
+                        @foreach (var status in Enum.GetValues(typeof(StatusType)))
+                        {
+                            <option value="@status">@status</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="() => AppointmentModel.Status" class="text-danger" />
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/appointments">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private CS212FinalProject.Models.Appointment? AppointmentModel { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        AppointmentModel ??= await context.Appointments.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (AppointmentModel is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task UpdateAppointment()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(AppointmentModel!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!AppointmentExists(AppointmentModel!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/appointments");
+    }
+
+    private bool AppointmentExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Appointments.Any(e => e.Id == id);
+    }
+}
