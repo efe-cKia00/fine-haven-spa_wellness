@@ -4,32 +4,34 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>2943bca6-97c7-428e-b19a-2fe758c9e72f</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="Components\Pages\Dashboard\**" />
     <Compile Remove="Components\Pages\UserPages\**" />
+
     <Content Remove="Components\Pages\Dashboard\**" />
     <Content Remove="Components\Pages\UserPages\**" />
+
     <EmbeddedResource Remove="Components\Pages\Dashboard\**" />
     <EmbeddedResource Remove="Components\Pages\UserPages\**" />
+    <EmbeddedResource Remove="Migrations\**" />
     <None Remove="Components\Pages\Dashboard\**" />
     <None Remove="Components\Pages\UserPages\**" />
+
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid.EntityFrameworkAdapter" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

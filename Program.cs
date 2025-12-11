@@ -16,34 +16,30 @@ builder.Services.AddQuickGridEntityFrameworkAdapter();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDbContextFactory<CS212FinalProjectContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("CS212FinalProjectContext") ?? throw new InvalidOperationException("Connection string 'CS212FinalProjectContext' not found.")));
-
 builder.Services.AddQuickGridEntityFrameworkAdapter();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Add authentication for users as cookies
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
 
 // Add http context accessor
 builder.Services.AddHttpContextAccessor();
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddCascadingAuthenticationState();
 
 var app = builder.Build();
 
-/**using (var scope = app.Services.CreateScope())
+using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
 
     SeedData.Initialize(services);
-}**/
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -54,13 +50,8 @@ if (!app.Environment.IsDevelopment())
     app.UseMigrationsEndPoint();
 }
 
-app.UseHttpsRedirection();
+app.UseHttpsRedirection();app.UseAntiforgery();app.MapStaticAssets();
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
-
-app.UseAntiforgery();
-
-app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
-
+// Runs the app
 app.Run();

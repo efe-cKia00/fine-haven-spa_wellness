@@ -9,7 +9,7 @@ namespace CS212FinalProject.Data
 {
     public class CS212FinalProjectContext : DbContext
     {
-        public CS212FinalProjectContext (DbContextOptions<CS212FinalProjectContext> options)
+        public CS212FinalProjectContext(DbContextOptions<CS212FinalProjectContext> options)
             : base(options)
         {
         }
@@ -17,22 +17,45 @@ namespace CS212FinalProject.Data
         // Use plural DbSet names
         public DbSet<Service> Services { get; set; } = default!;
         public DbSet<Appointment> Appointments { get; set; } = default!;
-        public DbSet<User> Users { get; set; } = null!;
+        public DbSet<User> Users { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Persist Role enum as string and set DB default to "Customer"
-            modelBuilder.Entity<User>()
-                .Property(u => u.Role)
-                .HasConversion<string>()
-                .HasDefaultValue(RoleType.Customer);
+            // User configuration: store enum as string, default to Customer, and ensure unique emails
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.Property(u => u.Role)
+                      .HasConversion<string>()
+                      .HasDefaultValue(RoleType.Customer);
+
+                entity.HasIndex(u => u.Email)
+                      .IsUnique();
+
+                entity.Property(u => u.PasswordHash)
+                      .IsRequired();
+
+                entity.Property(u => u.FirstName).HasMaxLength(50);
+                entity.Property(u => u.LastName).HasMaxLength(50);
+                entity.Property(u => u.Email).HasMaxLength(256);
+                entity.Property(u => u.PhoneNumber).HasMaxLength(30);
+            });
 
             // Configure Service
             modelBuilder.Entity<Service>(entity =>
             {
-                // Column type already set by attribute, but ensure here as well
-                entity.Property(s => s.Price).HasColumnType("decimal(18,2)");
-                entity.Property(s => s.IsAvailable).HasDefaultValue(true);
+                entity.Property(s => s.Name)
+                      .IsRequired()
+                      .HasMaxLength(50);
+
+                entity.Property(s => s.Description)
+                      .IsRequired()
+                      .HasMaxLength(200);
+
+                entity.Property(s => s.Price)
+                      .HasColumnType("decimal(18,2)");
+
+                entity.Property(s => s.IsAvailable)
+                      .HasDefaultValue(true);
             });
 
             // Configure Appointment relationships and enum storage
@@ -60,6 +83,9 @@ namespace CS212FinalProject.Data
                 entity.Property(a => a.Status)
                       .HasConversion<string>()
                       .HasDefaultValue(StatusType.Pending);
+
+                entity.Property(a => a.DateAndTime)
+                      .IsRequired();
             });
 
             // other model configuration...

@@ -4,7 +4,7 @@
     public enum StatusType
     {
         Pending = 0,
-        NoShow,
+        Canceled,
         CheckedIn,
         Completed
     }
