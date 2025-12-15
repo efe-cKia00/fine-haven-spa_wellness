@@ -13,15 +13,13 @@ builder.Services.AddDbContextFactory<CS212FinalProjectContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CS212FinalProjectContext") ?? throw new InvalidOperationException("Connection string 'CS212FinalProjectContext' not found.")));
 
 builder.Services.AddQuickGridEntityFrameworkAdapter();
-
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-builder.Services.AddQuickGridEntityFrameworkAdapter();
-
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 // Add authentication for users as cookies
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+
+// Add authorization
+builder.Services.AddAuthorization();
 
 // Add http context accessor
 builder.Services.AddHttpContextAccessor();
@@ -50,7 +48,21 @@ if (!app.Environment.IsDevelopment())
     app.UseMigrationsEndPoint();
 }
 
-app.UseHttpsRedirection();app.UseAntiforgery();app.MapStaticAssets();
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseAntiforgery();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapGet("/signout-exec", async (HttpContext http) =>
+{
+    // Perform HTTP sign-out using the cookie scheme, then redirect home
+    await http.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    http.Response.Redirect("/");
+});
+
+app.MapStaticAssets();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 // Runs the app

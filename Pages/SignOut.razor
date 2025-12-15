@@ -1,0 +1,16 @@
+@page "/signout"
+@inject NavigationManager NavigationManager
+
+<h3>Signing out...</h3>
+<p>If you are not redirected, <a href="/">click here</a>.</p>
+
+@code {
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Force a full HTTP load to the server endpoint that can access HttpContext
+            NavigationManager.NavigateTo("/signout-exec", forceLoad: true);
+        }
+    }
+}

@@ -1,13 +1,27 @@
 ﻿@page "/app/service-page"
+@using CS212FinalProject.Components.Layout
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using CS212FinalProject.Models
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthService SignInService
+@inject CS212FinalProject.Data.CS212FinalProjectContext Db
+@inject NavigationManager NavigationManager
 
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Authentication.Cookies
-@using Microsoft.AspNetCore.Http
+<PageTitle>Available Services</PageTitle>
 
-<PageTitle>ServicePage</PageTitle>
+<div class="page">
+    
+    <NavMenu />
 
-<h3>Available Services</h3>
-<hr />
+    <main>
+        <article class="content px-4">
+        
+        </article>
+    </main>
+
+</div>
 
 @code {
 

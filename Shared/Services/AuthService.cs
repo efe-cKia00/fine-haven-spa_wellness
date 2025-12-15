@@ -11,19 +11,21 @@ namespace Shared.Services
 {
     public class AuthService : IAuthService
     {
-        private readonly CS212FinalProjectContext _db;
+        private readonly IDbContextFactory<CS212FinalProjectContext> _dbFactory;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuthService(CS212FinalProjectContext db, IHttpContextAccessor httpContextAccessor)
+        public AuthService(IDbContextFactory<CS212FinalProjectContext> dbFactory, IHttpContextAccessor httpContextAccessor)
         {
-            _db = db;
+            _dbFactory = dbFactory;
             _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<bool> CreateAccountAsync(string firstName, string lastName, string email, string phoneNumber, string password)
         {
             email = (email ?? string.Empty).Trim().ToLowerInvariant();
-            if (await _db.Users.AnyAsync(u => u.Email == email))
+
+            using var db = _dbFactory.CreateDbContext();
+            if (await db.Users.AnyAsync(u => u.Email == email))
                 return false;
 
             var user = new User
@@ -37,15 +39,17 @@ namespace Shared.Services
                 PasswordHash = PasswordHasher.Hash(password ?? string.Empty)
             };
 
-            _db.Users.Add(user);
-            await _db.SaveChangesAsync();
+            db.Users.Add(user);
+            await db.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> SignInAsync(string email, string password)
         {
             email = (email ?? string.Empty).Trim().ToLowerInvariant();
-            var user = await _db.Users.SingleOrDefaultAsync(u => u.Email == email);
+
+            using var db = _dbFactory.CreateDbContext();
+            var user = await db.Users.SingleOrDefaultAsync(u => u.Email == email);
             if (user == null) return false;
 
             var valid = PasswordHasher.Verify(password ?? string.Empty, user.PasswordHash);
@@ -77,8 +81,11 @@ namespace Shared.Services
             var httpContext = _httpContextAccessor.HttpContext;
             if (httpContext != null)
             {
-                await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                await httpContext.SignOutAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme);
             }
+            // If HttpContext is null (e.g., called from a Blazor Server circuit),
+            // this method will be a no-op; use a real HTTP endpoint to ensure sign-out.
         }
     }
 }
