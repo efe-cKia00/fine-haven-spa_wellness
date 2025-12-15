@@ -11,14 +11,14 @@ public class SeedData
                 DbContextOptions<CS212FinalProjectContext>>());
 
         // Check if any of the database context variable(s) are null. They shouldn't be.
-        if (context == null || context.Users == null || context.Services == null || context.Appointments == null)
+        if (context == null || context.Users == null || context.Services == null)
         {
             throw new NullReferenceException(
                 "Null CS212FinalProjectContext or Users DbSet");
         }
 
         // Check if the database is already seeded
-        if (context.Users.Any() && context.Services.Any() && context.Appointments.Any())
+        if (context.Users.Any() && context.Services.Any())
         {
             return;
         }
@@ -31,7 +31,7 @@ public class SeedData
                 Email = "customer@example.com",
                 PhoneNumber = "123-456-7890",
                 Role = RoleType.Customer,
-                PasswordHash = PasswordHasher.Hash("Pcustomer"),
+                PasswordHash = PasswordHasher.Hash("Customer"),
             },
             new User
             {
@@ -40,7 +40,7 @@ public class SeedData
                 Email = "receptionist@example.com",
                 PhoneNumber = "123-456-7890",
                 Role = RoleType.Receptionist,
-                PasswordHash = PasswordHasher.Hash("Preceptionist"),
+                PasswordHash = PasswordHasher.Hash("Receptionist"),
             },
             new User
             {
@@ -49,7 +49,7 @@ public class SeedData
                 Email = "sp@example.com",
                 PhoneNumber = "123-456-7890",
                 Role = RoleType.ServiceProvider,
-                PasswordHash = PasswordHasher.Hash("Pserviceprovider"),
+                PasswordHash = PasswordHasher.Hash("ServiceProvider"),
             },
             new User
             {
@@ -58,7 +58,7 @@ public class SeedData
                 Email = "manager@example.com",
                 PhoneNumber = "123-456-7890",
                 Role = RoleType.Manager,
-                PasswordHash = PasswordHasher.Hash("Pmanager"),
+                PasswordHash = PasswordHasher.Hash("Manager"),
             }
         );
 
@@ -66,67 +66,32 @@ public class SeedData
             new Service
             {
                 Name = "Massage",
-                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Assumenda enim rerum laboriosam. Culpa, iusto? Accusamus quasi corporis facilis fugit similique, dolorum recusandae cupiditate nobis mollitia, deleniti aspernatur, quo veritatis rem? Sed quaerat, placeat eaque at voluptate itaque odit sint libero modi, maiores delectus qui magni.",
+                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit.",
                 Price = 20,
                 IsAvailable = true,
             },
             new Service
             {
                 Name = "Beard Trim",
-                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Assumenda enim rerum laboriosam. Culpa, iusto? Accusamus quasi corporis facilis fugit similique, dolorum recusandae cupiditate nobis mollitia, deleniti aspernatur, quo veritatis rem? Sed quaerat, placeat eaque at voluptate itaque odit sint libero modi, maiores delectus qui magni.",
+                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit.",
                 Price = 15,
                 IsAvailable = true,
             },
             new Service
             {
                 Name = "Deep Tissue Massage",
-                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Assumenda enim rerum laboriosam. Culpa, iusto? Accusamus quasi corporis facilis fugit similique, dolorum recusandae cupiditate nobis mollitia, deleniti aspernatur, quo veritatis rem? Sed quaerat, placeat eaque at voluptate itaque odit sint libero modi, maiores delectus qui magni.",
+                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit.",
                 Price = 10,
                 IsAvailable = false,
             },
             new Service
             {
                 Name = "Facial",
-                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Assumenda enim rerum laboriosam. Culpa, iusto? Accusamus quasi corporis facilis fugit similique, dolorum recusandae cupiditate nobis mollitia, deleniti aspernatur, quo veritatis rem? Sed quaerat, placeat eaque at voluptate itaque odit sint libero modi, maiores delectus qui magni.",
+                Description = "Lorem ipsum dolor, sit amet consectetur adipisicing elit.",
                 Price = 25,
                 IsAvailable = true,
             }
-        );
-
-        context.Appointments.AddRange(
-            new Appointment
-            {
-                CustomerId = 1,
-                ServiceProviderId = 3,
-                ServiceId = 1,
-                DateAndTime = DateTime.Now,
-                Status = StatusType.Pending,
-            },
-            new Appointment
-            {
-                CustomerId = 1,
-                ServiceProviderId = 3,
-                ServiceId = 2,
-                DateAndTime = DateTime.Now,
-                Status = StatusType.Pending,
-            },
-            new Appointment
-            {
-                CustomerId = 1,
-                ServiceProviderId = 3,
-                ServiceId = 1,
-                DateAndTime = DateTime.Now,
-                Status = StatusType.NoShow,
-            },
-            new Appointment
-            {
-                CustomerId = 1,
-                ServiceProviderId = 3,
-                ServiceId = 2,
-                DateAndTime = DateTime.Now,
-                Status = StatusType.Completed,
-            }
-        );
+        );     
 
         context.SaveChanges();
     }

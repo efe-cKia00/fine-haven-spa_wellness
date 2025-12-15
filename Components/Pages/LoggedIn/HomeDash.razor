@@ -1,13 +1,329 @@
-﻿@page "/system/home-dash"
+﻿@page "/app"
+@using CS212FinalProject.Components.Layout
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using CS212FinalProject.Models
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthService SignInService
+@inject CS212FinalProject.Data.CS212FinalProjectContext Db
+@inject NavigationManager NavigationManager
 
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Authentication.Cookies
-@using Microsoft.AspNetCore.Http
 
 <PageTitle>Home Dashboard</PageTitle>
 
-<h2> Welcome $"{User.Identity.FirstName}" </h2>
+
+<div class="page">
+    
+    <NavMenu />
+       
+    <main>
+        <article class="content px-4">
+            <div class="container mt-4">
+                <h1>Welcome @UserFullName</h1>
+                <p class="text-muted">Role: @UserRoleString</p>
+
+                <!-- Customer view -->
+                <AuthorizeView Roles="Customer">
+                    <Authorized>
+                        <h3 class="mt-4">Your pending appointments</h3>
+                        @if (customerAppointments is null)
+                        {
+                            <p><em>Loading...</em></p>
+                        }
+                        else if (!customerAppointments.Any())
+                        {
+                            <p>No pending appointments.</p>
+                        }
+                        else
+                        {
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Service</th>
+                                        <th>Date and time</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var appt in customerAppointments)
+                                    {
+                                        <tr>
+                                            <td>@appt.Service?.Name</td>
+                                            <td>@appt.DateAndTime.ToString("g")</td>
+                                            <td>@appt.Status.ToString()</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </Authorized>
+                </AuthorizeView>
+
+                <!-- Receptionist view -->
+                <AuthorizeView Roles="Receptionist">
+                    <Authorized>
+                        <h3 class="mt-4">Pending appointments (assigned to providers)</h3>
+                        @if (receptionistAppointments is null)
+                        {
+                            <p><em>Loading...</em></p>
+                        }
+                        else if (!receptionistAppointments.Any())
+                        {
+                            <p>No matching appointments.</p>
+                        }
+                        else
+                        {
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Service</th>
+                                        <th>Customer</th>
+                                        <th>Date and time</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var appt in receptionistAppointments)
+                                    {
+                                        <tr>
+                                            <td>@appt.Service?.Name</td>
+                                            <td>@($"{appt.Customer?.FirstName} {appt.Customer?.LastName}")</td>
+                                            <td>@appt.DateAndTime.ToString("g")</td>
+                                            <td>
+                                                <select class="form-select" @bind="selectedStatus[appt.Id]">
+                                                    @foreach (var s in statusOptions)
+                                                    {
+                                                        <option value="@s">@s</option>
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary" @onclick="() => SaveStatusAsync(appt.Id)" disabled="@saveInProgress.ContainsKey(appt.Id) && saveInProgress[appt.Id]">
+                                                    Save
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </Authorized>
+                </AuthorizeView>
+
+                <!-- Manager view -->
+                <AuthorizeView Roles="Manager">
+                    <Authorized>
+                        <h3 class="mt-4">Pending unassigned appointments</h3>
+                        @if (managerAppointments is null || serviceProviders is null)
+                        {
+                            <p><em>Loading...</em></p>
+                        }
+                        else if (!managerAppointments.Any())
+                        {
+                            <p>No pending unassigned appointments.</p>
+                        }
+                        else
+                        {
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Service</th>
+                                        <th>Service provider</th>
+                                        <th>Date and time</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var appt in managerAppointments)
+                                    {
+                                        <tr>
+                                            <td>@appt.Service?.Name</td>
+                                            <td>
+                                                <select class="form-select" @bind="selectedProvider[appt.Id]">
+                                                    <option value="">-- choose provider --</option>
+                                                    @foreach (var sp in serviceProviders)
+                                                    {
+                                                        <option value="@sp.Id">@($"{sp.FirstName} {sp.LastName}")</option>
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td>@appt.DateAndTime.ToString("g")</td>
+                                            <td>@appt.Status.ToString()</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary" @onclick="() => AssignProviderAsync(appt.Id)" disabled="@assignInProgress.ContainsKey(appt.Id) && assignInProgress[appt.Id]">
+                                                    Save
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </Authorized>
+                </AuthorizeView>
+
+                <!-- ServiceProvider view: currently same as Home; you can expand as needed -->
+                <AuthorizeView Roles="ServiceProvider">
+                    <Authorized>
+                        <h3 class="mt-4">Provider dashboard</h3>
+                        <p>Provider-specific UI can go here (e.g., your assigned appointments).</p>
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+        </article>
+    </main>
+
+
+
+</div>
 
 @code {
+    private string UserFullName = "Guest";
+    private string UserRoleString = "None";
+    private int? userId;
 
+    // Data
+    private List<Appointment>? customerAppointments;
+    private List<Appointment>? receptionistAppointments;
+    private List<Appointment>? managerAppointments;
+    private List<User>? serviceProviders;
+
+    // status choices and per-row selection
+    private readonly List<string> statusOptions = Enum.GetNames(typeof(StatusType)).ToList();
+    private readonly Dictionary<int, string> selectedStatus = new();
+    private readonly Dictionary<int, int?> selectedProvider = new();
+
+    // track per-row saves
+    private readonly Dictionary<int, bool> saveInProgress = new();
+    private readonly Dictionary<int, bool> assignInProgress = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            var nameClaim = user.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
+            UserFullName = nameClaim;
+
+            var idClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (int.TryParse(idClaim, out var id))
+                userId = id;
+
+            var roleClaim = user.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+            UserRoleString = roleClaim;
+
+            // Load data based on role
+            if (roleClaim == RoleType.Customer.ToString())
+            {
+                await LoadCustomerAppointmentsAsync();
+            }
+            else if (roleClaim == RoleType.Receptionist.ToString())
+            {
+                await LoadReceptionistAppointmentsAsync();
+            }
+            else if (roleClaim == RoleType.Manager.ToString())
+            {
+                await LoadManagerAppointmentsAsync();
+            }
+            else if (roleClaim == RoleType.ServiceProvider.ToString())
+            {
+                await LoadProviderDataAsync();
+            }
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/access-denied", true);
+        }
+    }
+
+    private async Task LoadCustomerAppointmentsAsync()
+    {
+        if (userId == null) return;
+        customerAppointments = await Db.Appointments
+            .Include(a => a.Service)
+            .Where(a => a.CustomerId == userId && a.Status == StatusType.Pending)
+            .ToListAsync();
+    }
+
+    private async Task LoadReceptionistAppointmentsAsync()
+    {
+        receptionistAppointments = await Db.Appointments
+            .Include(a => a.Service)
+            .Include(a => a.Customer)
+            .Where(a => a.Status == StatusType.Pending && a.ServiceProviderId != null)
+            .ToListAsync();
+
+        // init selection with current status
+        foreach (var a in receptionistAppointments)
+        {
+            selectedStatus[a.Id] = a.Status.ToString();
+        }
+    }
+
+    private async Task LoadManagerAppointmentsAsync()
+    {
+        managerAppointments = await Db.Appointments
+            .Include(a => a.Service)
+            .Where(a => a.Status == StatusType.Pending && a.ServiceProviderId == null)
+            .ToListAsync();
+
+        serviceProviders = await Db.Users
+            .Where(u => u.Role == RoleType.ServiceProvider)
+            .ToListAsync();
+
+        // init provider selections
+        foreach (var a in managerAppointments)
+        {
+            selectedProvider[a.Id] = a.ServiceProviderId;
+        }
+    }
+
+    private async Task LoadProviderDataAsync()
+    {
+        // Placeholder: load provider-specific data if desired
+        // e.g., assigned appointments
+        await Task.CompletedTask;
+    }
+
+    private async Task SaveStatusAsync(int appointmentId)
+    {
+        if (!selectedStatus.TryGetValue(appointmentId, out var newStatusStr)) return;
+        if (!Enum.TryParse<StatusType>(newStatusStr, out var newStatus)) return;
+
+        saveInProgress[appointmentId] = true;
+        var appt = await Db.Appointments.FindAsync(appointmentId);
+        if (appt != null)
+        {
+            appt.Status = newStatus;
+            await Db.SaveChangesAsync();
+            // refresh receptionist list
+            await LoadReceptionistAppointmentsAsync();
+            StateHasChanged();
+        }
+        saveInProgress[appointmentId] = false;
+    }
+
+    private async Task AssignProviderAsync(int appointmentId)
+    {
+        if (!selectedProvider.TryGetValue(appointmentId, out var providerId)) return;
+        if (providerId == null) return;
+
+        assignInProgress[appointmentId] = true;
+        var appt = await Db.Appointments.FindAsync(appointmentId);
+        if (appt != null)
+        {
+            appt.ServiceProviderId = providerId;
+            // you may want to change status when assigning; current spec says manager modifies provider only
+            await Db.SaveChangesAsync();
+            // refresh manager list
+            await LoadManagerAppointmentsAsync();
+            StateHasChanged();
+        }
+        assignInProgress[appointmentId] = false;
+    }
 }

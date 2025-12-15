@@ -1,0 +1,28 @@
+﻿@page "/app/service-page"
+@using CS212FinalProject.Components.Layout
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using CS212FinalProject.Models
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthService SignInService
+@inject CS212FinalProject.Data.CS212FinalProjectContext Db
+@inject NavigationManager NavigationManager
+
+<PageTitle>Available Services</PageTitle>
+
+<div class="page">
+    
+    <NavMenu />
+
+    <main>
+        <article class="content px-4">
+        
+        </article>
+    </main>
+
+</div>
+
+@code {
+
+}

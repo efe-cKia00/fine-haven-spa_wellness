@@ -3,6 +3,15 @@
     "mssql1": {
       "type": "mssql.local",
       "connectionId": "ConnectionStrings:CS212FinalProjectContext"
+    },
+    "secrets1": {
+      "type": "secrets.user"
+    },
+    "sqlite1": {
+      "secretStore": "LocalSecretsFile",
+      "type": "sqlite.local",
+      "connectionId": "ConnectionStrings:DatabaseConnection",
+      "dynamicId": null
     }
   }
 }

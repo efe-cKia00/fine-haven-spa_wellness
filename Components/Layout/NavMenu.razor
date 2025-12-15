@@ -1,34 +1,77 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Student App</a>
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+@inject IAuthService AuthService
+
+
+<div class="sidebar">
+    <div class="top-row ps-3 navbar navbar-dark ">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="@("/")">
+                <img src="@("/logo.png")" alt="Logo" style="height:40px;" />
+            </a>
+        </div>
+    </div>
+        
+    <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+        <nav class="nav flex-column">
+            <!-- Home: visible to all authenticated roles -->
+            <AuthorizeView>
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="/app" Match="NavLinkMatch.All">
+                            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+            <!-- Services: visible to Customer, Receptionist, ServiceProvider, Manager -->
+            <AuthorizeView Roles="Customer,Receptionist,ServiceProvider,Manager">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="/app/service-page">
+                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Services
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+            <!-- Account: visible to Customer and Manager -->
+            <AuthorizeView Roles="Customer,Manager">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="/app/account">
+                            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Account
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+            <!-- Sign out (visible when authenticated) -->
+            <AuthorizeView>
+                <Authorized>
+                    <div class="nav-item px-3 mt-3">
+                        <a class="nav-link" href="@("/app/sign-out")">Sign Out</a>
+                    </div>
+                </Authorized>
+
+                <NotAuthorized>
+                    <div class="nav-item px-3 mt-3">
+                        <NavLink class="nav-link" href="/signin">Sign In</NavLink>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
+        </nav>
     </div>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/systemservices">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Services
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/system/account">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Account
-            </NavLink>
-        </div>
-    </nav>
-</div>
-
-
 @code {
-
+     private async Task Logout()
+    {
+        // Navigate to the server signout endpoint which will clear the auth cookie
+        NavigationManager.NavigateTo("/app/sign-out", forceLoad: true);
+        await Task.CompletedTask;
+    }
 }
