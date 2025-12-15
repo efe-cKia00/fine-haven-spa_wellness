@@ -1,0 +1,72 @@
+﻿@page "/appointments/delete"
+@using Microsoft.EntityFrameworkCore
+@using CS212FinalProject.Models
+@inject IDbContextFactory<CS212FinalProject.Data.CS212FinalProjectContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<p>Are you sure you want to delete this?</p>
+<div>
+    <h2>Appointment</h2>
+    <hr />
+    @if (AppointmentModel is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <dl class="row">
+            <dt class="col-sm-2">ServiceProviderId</dt>
+            <dd class="col-sm-10">@AppointmentModel.ServiceProviderId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">CustomerId</dt>
+            <dd class="col-sm-10">@AppointmentModel.CustomerId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">ServiceId</dt>
+            <dd class="col-sm-10">@AppointmentModel.ServiceId</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">DateAndTime</dt>
+            <dd class="col-sm-10">@AppointmentModel.DateAndTime</dd>
+        </dl>
+        <dl class="row">
+            <dt class="col-sm-2">Status</dt>
+            <dd class="col-sm-10">@AppointmentModel.Status</dd>
+        </dl>
+        <EditForm method="post" Model="AppointmentModel" OnValidSubmit="DeleteAppointment" FormName="delete" Enhance>
+            <button type="submit" class="btn btn-danger" disabled="@(AppointmentModel is null)">Delete</button> |
+            <a href="/appointments">Back to List</a>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private CS212FinalProject.Models.Appointment? AppointmentModel;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        AppointmentModel = await context.Appointments.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (AppointmentModel is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteAppointment()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Appointments.Remove(AppointmentModel!);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/appointments");
+    }
+}
