@@ -1,0 +1,94 @@
+﻿@page "/app/service-page"
+@using CS212FinalProject.Components.Layout
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using CS212FinalProject.Models
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthService SignInService
+@inject CS212FinalProject.Data.CS212FinalProjectContext Db
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
+<PageTitle>Available Services</PageTitle>
+
+<div class="page">
+    
+    <NavMenu />
+
+    <main>
+        <article class="content px-4">
+            <h1>Available Services</h1>
+            <hr />
+            <AuthorizeView Roles="Manager">
+                <a class="btn btn-primary" href="@("/app/service/create")">New Service</a>
+            </AuthorizeView>
+            <div class="row mx-3">
+                @foreach (var service in services)
+                {
+                    @if (service.IsAvailable)
+                    {
+                        <div class="col-sm-2 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h2 class="card-title">@service.Name</h2>
+                                    <p class="card-body">@service.Description</p>
+                                    <p><strong>@service.Price.ToString("C")</strong></p>
+                                    <AuthorizeView Context="authManager" Roles="Manager">
+                                        <div class="flex-row">
+                                            <a class="btn btn-primary me-2" href="@($"/app/service/edit?id={service.Id}")">Edit</a>
+                                            <EditForm Model="service" OnValidSubmit="() => DeleteServiceAsync(service.Id)">
+                                                <button type="submit" class="btn btn-danger" disabled="@(service is null)">Delete</button>
+                                            </EditForm>
+                                        </div>
+                                    </AuthorizeView>
+                                    <AuthorizeView Roles="Customer">
+                                        <a class="btn btn-primary" href="@($"/app/appointment/create?id={service.Id}")">Book</a>
+                                    </AuthorizeView>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </article>
+    </main>
+
+</div>
+
+@code {
+    private List<Service> services = new List<Service>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user?.Identity == null || !user.Identity.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/sign-in");
+            return;
+        }
+        services = await Db.Services.ToListAsync();
+    }
+
+    private async Task LoadServicesAsync()
+    {
+        services = await Db.Services.ToListAsync();
+    }
+
+    private async Task DeleteServiceAsync(int id)
+    {
+        // confirm with user
+        var ok = await JS.InvokeAsync<bool>("confirm", "Delete this service?");
+        if (!ok) return;
+
+        var svc = await Db.Services.FindAsync(id);
+        if (svc == null) return;
+
+        Db.Services.Remove(svc);
+        await Db.SaveChangesAsync();
+
+        await LoadServicesAsync();
+        StateHasChanged();
+    }
+}

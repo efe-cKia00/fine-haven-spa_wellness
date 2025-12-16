@@ -1,0 +1,62 @@
+﻿@page "/app/account"
+@using CS212FinalProject.Components.Layout
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using CS212FinalProject.Models
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthService SignInService
+@inject IDbContextFactory<CS212FinalProject.Data.CS212FinalProjectContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Home Dashboard</PageTitle>
+
+<div class="page">
+    
+    <NavMenu />
+
+    <main>
+        <article class="content px-4">
+            <AuthorizeView Roles="Customer">
+                <Authorized>
+                    <h3>Welcome, Manager!</h3>
+                </Authorized>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Manager">
+                <Authorized>
+                    <h3>Welcome, Manager!</h3>
+                </Authorized>
+            </AuthorizeView>
+        </article>
+    </main>
+
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private User User { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user?.Identity == null || !user.Identity.IsAuthenticated || !user.IsInRole("Manager") || !user.IsInRole("Customer"))
+        {
+            NavigationManager.NavigateTo("/access-denied");
+            return;
+        }
+
+        User ??= new();
+    }
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddUser()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Users.Add(User);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/users");
+    }
+}

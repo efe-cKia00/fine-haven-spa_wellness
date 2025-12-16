@@ -1,0 +1,92 @@
+﻿@page "/app/service/create"
+@using CS212FinalProject.Components.Layout
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using CS212FinalProject.Models
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IDbContextFactory<CS212FinalProject.Data.CS212FinalProjectContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<div class="page">
+    
+    <NavMenu />
+
+    <main>
+        <article class="content px-4">
+            <h1>Create</h1>
+
+            <h2>Service</h2>
+            <hr />
+            <div class="row">
+                <div class="col-md-4">
+                    <EditForm method="post" Model="Service" OnValidSubmit="AddService" FormName="create" Enhance>
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" role="alert"/>
+                        <div class="mb-3">
+                            <span class="text-danger">*</span>
+                            <label for="name" class="form-label">Name:</label> 
+                            <InputText id="name" @bind-Value="Service.Name" class="form-control" aria-required="true"/> 
+                            <ValidationMessage For="() => Service.Name" class="text-danger" /> 
+                        </div>        
+                        <div class="mb-3">
+                            <span class="text-danger">*</span>
+                            <label for="description" class="form-label">Description:</label> 
+                            <InputText id="description" @bind-Value="Service.Description" class="form-control" aria-required="true"/> 
+                            <ValidationMessage For="() => Service.Description" class="text-danger" /> 
+                        </div>        
+                        <div class="mb-3">
+                            <span class="text-danger">*</span>
+                            <label for="price" class="form-label">Price:</label> 
+                            <InputNumber id="price" @bind-Value="Service.Price" class="form-control" aria-required="true"/> 
+                            <ValidationMessage For="() => Service.Price" class="text-danger" /> 
+                        </div>        
+                        <div class="mb-3">
+                            <label class="form-label">Is Available</label>
+                            <InputSelect class="form-select" @bind-Value="Service.IsAvailable">
+                                <option value="true">True</option>
+                                <option value="false">False</option>
+                            </InputSelect>
+                            <ValidationMessage For="() => Service.IsAvailable" class="text-danger" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </EditForm>
+                </div>
+            </div>
+
+            <div>
+                <a href="@("/app/service-page")">Back to List</a>
+            </div>
+        </article>
+    </main>
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private Service Service { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync() 
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.IsInRole(RoleType.Manager.ToString()))
+        {
+            NavigationManager.NavigateTo("/access-denied");
+            return;
+        }
+
+        Service ??= new();
+    }
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddService()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Services.Add(Service);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/app/service-page");
+    }
+}

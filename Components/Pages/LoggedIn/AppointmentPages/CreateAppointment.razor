@@ -1,32 +1,34 @@
-﻿@page "/appointments/edit"
+﻿@page "/app/appointment/create"
+@using CS212FinalProject.Components.Layout
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
 @using Microsoft.EntityFrameworkCore
 @using CS212FinalProject.Models
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthService SignInService
 @inject IDbContextFactory<CS212FinalProject.Data.CS212FinalProjectContext> DbFactory
 @inject NavigationManager NavigationManager
 
-<PageTitle>Edit</PageTitle>
+<PageTitle>Book an Appointment</PageTitle>
 
-<h1>Edit</h1>
+<div class="page">
 
-<h2>Appointment</h2>
-<hr />
-@if (AppointmentModel is null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div class="row">
-        <div class="col-md-4">
-            <EditForm method="post" Model="AppointmentModel" OnValidSubmit="UpdateAppointment" FormName="edit" Enhance>
+    <NavMenu />
+
+    <main>
+        <article class="content px-4">
+            <h1>Create</h1>
+
+            <h2>Appointment</h2>
+            <hr />
+            @* We use "AppointmentModel" here to avoid confusing the compiler *@
+            <EditForm method="post" Model="AppointmentModel" OnValidSubmit="AddAppointment" FormName="create" Enhance>
                 <DataAnnotationsValidator />
-                <ValidationSummary role="alert" />
-
-                @* Use AppointmentModel.Id *@
-                <input type="hidden" name="AppointmentModel.Id" value="@AppointmentModel.Id" />
+                <ValidationSummary class="text-danger" role="alert" />
 
                 <div class="mb-3">
                     <label for="serviceproviderid" class="form-label">ServiceProviderId:</label>
+                    @* InputNumber handles int? correctly *@
                     <InputNumber id="serviceproviderid" @bind-Value="AppointmentModel.ServiceProviderId" class="form-control" />
                     <ValidationMessage For="() => AppointmentModel.ServiceProviderId" class="text-danger" />
                 </div>
@@ -48,7 +50,7 @@ else
                 <div class="mb-3">
                     <span class="text-danger">*</span>
                     <label for="dateandtime" class="form-label">DateAndTime:</label>
-                    @* Added Type="DateTimeLocal" *@
+                    @* Type="datetime-local" allows picking both date and time *@
                     <InputDate Type="InputDateType.DateTimeLocal" id="dateandtime" @bind-Value="AppointmentModel.DateAndTime" class="form-control" aria-required="true" />
                     <ValidationMessage For="() => AppointmentModel.DateAndTime" class="text-danger" />
                 </div>
@@ -56,7 +58,7 @@ else
                 <div class="mb-3">
                     <span class="text-danger">*</span>
                     <label for="status" class="form-label">Status:</label>
-                    @* CHANGED: InputText -> InputSelect for Enum *@
+                    @* CHANGED: Used InputSelect because Status is an Enum *@
                     <InputSelect id="status" @bind-Value="AppointmentModel.Status" class="form-control" aria-required="true">
                         @foreach (var status in Enum.GetValues(typeof(StatusType)))
                         {
@@ -66,61 +68,40 @@ else
                     <ValidationMessage For="() => AppointmentModel.Status" class="text-danger" />
                 </div>
 
-                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-primary">Create</button>
             </EditForm>
-        </div>
-    </div>
-}
+        </article>
+    </main>
 
-<div>
-    <a href="/appointments">Back to List</a>
 </div>
 
 @code {
-    [SupplyParameterFromQuery]
-    private int Id { get; set; }
-
     [SupplyParameterFromForm]
-    private CS212FinalProject.Models.Appointment? AppointmentModel { get; set; }
+    private CS212FinalProject.Models.Appointment AppointmentModel { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-        AppointmentModel ??= await context.Appointments.FirstOrDefaultAsync(m => m.Id == Id);
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
 
-        if (AppointmentModel is null)
+        if (!user.IsInRole(RoleType.Customer.ToString()))
         {
-            NavigationManager.NavigateTo("notfound");
+            NavigationManager.NavigateTo("/access-denied");
+            return;
+        }
+
+        // Set a default date so the picker isn't blank/invalid
+        if (AppointmentModel.DateAndTime == default)
+        {
+            AppointmentModel.DateAndTime = DateTime.Now;
         }
     }
 
-    private async Task UpdateAppointment()
+    private async Task AddAppointment()
     {
         using var context = DbFactory.CreateDbContext();
-        context.Attach(AppointmentModel!).State = EntityState.Modified;
-
-        try
-        {
-            await context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!AppointmentExists(AppointmentModel!.Id))
-            {
-                NavigationManager.NavigateTo("notfound");
-            }
-            else
-            {
-                throw;
-            }
-        }
-
-        NavigationManager.NavigateTo("/appointments");
-    }
-
-    private bool AppointmentExists(int id)
-    {
-        using var context = DbFactory.CreateDbContext();
-        return context.Appointments.Any(e => e.Id == id);
+        context.Appointments.Add(AppointmentModel);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/app");
     }
 }

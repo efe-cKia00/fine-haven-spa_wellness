@@ -1,4 +1,13 @@
 ﻿@page "/"
+@using CS212FinalProject.Components.Layout
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@using CS212FinalProject.Models
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthService SignInService
+@inject CS212FinalProject.Data.CS212FinalProjectContext Db
+@inject NavigationManager NavigationManager
 
 <PageTitle>Home</PageTitle>
 
@@ -34,54 +43,20 @@
     <h2 id="sneak-a-peek" tabindex="-1">Sneak a Peek</h2>
         <p>Explore some of our most valued services. All services are by appointment only. <i>Available at 30mins - 2 hours. All services are non-refundable.</i></p>
 
+    @foreach (var service in services)
+    {
         <div class="col">
             <div class="hp-body card">
                 <div class="card-body">
-                    <h5 class="card-title">Service 1</h5>
-                    <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
-                    <a href="#" class="card-link hp-link-black">Book Now</a>
+                    <h5 class="card-title">@service.Name</h5>
+                    <p class="card-text">@service.Description</p>
+                    <a href="@("/sign-up")" class="card-link hp-link-black">Book Now</a>
                 </div>
             </div>
         </div>
+    }
 
-        <div class="col">
-            <div class="hp-body card">
-                <div class="card-body">
-                    <h5 class="card-title">Service 2</h5>
-                    <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
-                    <a href="#" class="card-link hp-link-black">Book Now</a>
-                </div>
-            </div>
-        </div>
     </div>
-
-    <div class="row mt-3">
-        <div class="col">
-            <div class="hp-body card">
-                <div class="card-body">
-                    <h5 class="card-title">Service 3</h5>
-                    <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
-                        <a href="#" class="card-link hp-link-black">Book Now</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col">
-            <div class="hp-body card">
-                <div class="card-body">
-                    <h5 class="card-title">Service 4</h5>
-                    <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card’s content.</p>
-                    <a href="#" class="card-link hp-link-black">Book Now</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
 </div>
 
 <div class="row text-center mt-5 hp-location hp-font-white">
@@ -117,3 +92,17 @@
 </div>
 
 </div>
+
+
+@code {
+    private List<Service> services = new List<Service>();
+    protected override async Task OnInitializedAsync()
+    {
+        services = await Db.Services.ToListAsync();
+    }
+    private async Task LoadServicesAsync()
+    {
+        services = await Db.Services
+        .ToListAsync();
+    }
+}
