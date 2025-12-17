@@ -38,16 +38,4 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.11" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="Components\Pages\UserPages\Create.razor" />
-    <None Include="Components\Pages\UserPages\Delete.razor" />
-    <None Include="Components\Pages\UserPages\Details.razor" />
-    <None Include="Components\Pages\UserPages\Edit.razor" />
-    <None Include="Components\Pages\UserPages\Index.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Components\Pages\UserPages\" />
-  </ItemGroup>
-
 </Project>

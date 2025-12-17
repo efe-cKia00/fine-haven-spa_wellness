@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using CS212FinalProject.Data;
 using CS212FinalProject.Models;
+using CS212FinalProject.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Shared.Services

@@ -9,6 +9,7 @@
 @inject CS212FinalProject.Data.CS212FinalProjectContext Db
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
+@rendermode InteractiveServer
 
 <PageTitle>Available Services</PageTitle>
 
@@ -26,29 +27,39 @@
             <div class="row mx-3">
                 @foreach (var service in services)
                 {
-                    @if (service.IsAvailable)
-                    {
+                    <AuthorizeView Context="authManager" Roles="Manager">
                         <div class="col-sm-2 mb-3">
                             <div class="card">
                                 <div class="card-body">
                                     <h2 class="card-title">@service.Name</h2>
                                     <p class="card-body">@service.Description</p>
                                     <p><strong>@service.Price.ToString("C")</strong></p>
-                                    <AuthorizeView Context="authManager" Roles="Manager">
-                                        <div class="flex-row">
-                                            <a class="btn btn-primary me-2" href="@($"/app/service/edit?id={service.Id}")">Edit</a>
-                                            <EditForm Model="service" OnValidSubmit="() => DeleteServiceAsync(service.Id)">
-                                                <button type="submit" class="btn btn-danger" disabled="@(service is null)">Delete</button>
-                                            </EditForm>
-                                        </div>
-                                    </AuthorizeView>
-                                    <AuthorizeView Roles="Customer">
-                                        <a class="btn btn-primary" href="@($"/app/appointment/create?id={service.Id}")">Book</a>
-                                    </AuthorizeView>
+                                    <div class="col-2">
+                                        <a class="btn btn-primary me-2" href="@($"/app/service/edit/{service.Id}")">Edit</a>
+                                        <EditForm Model="service" OnValidSubmit="() => DeleteServiceAsync(service.Id)">
+                                            <AntiforgeryToken />
+                                            <button type="submit" class="btn btn-danger" disabled="@(service is null)">Delete</button>
+                                        </EditForm>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    }
+                    </AuthorizeView>
+                    <AuthorizeView Roles="Customer, Receptionist">
+                        @if (service.IsAvailable)
+                        {
+                            <div class="col-sm-2 mb-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h2 class="card-title">@service.Name</h2>
+                                        <p class="card-body">@service.Description</p>
+                                        <p><strong>@service.Price.ToString("C")</strong></p>
+                                        <a class="btn btn-primary" href="@($"/app/appointment/create/{service.Id}")">Book</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </AuthorizeView>
                 }
             </div>
         </article>

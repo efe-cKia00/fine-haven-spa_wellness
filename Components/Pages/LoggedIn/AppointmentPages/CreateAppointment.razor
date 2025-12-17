@@ -1,107 +1,217 @@
-﻿@page "/app/appointment/create"
+﻿@page "/app/appointment/create/{serviceId:int}"
 @using CS212FinalProject.Components.Layout
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
 @using Microsoft.EntityFrameworkCore
 @using CS212FinalProject.Models
 @inject AuthenticationStateProvider AuthStateProvider
-@inject IAuthService SignInService
-@inject IDbContextFactory<CS212FinalProject.Data.CS212FinalProjectContext> DbFactory
+@inject CS212FinalProject.Data.CS212FinalProjectContext Db
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
-<PageTitle>Book an Appointment</PageTitle>
+<PageTitle>Create Appointment</PageTitle>
 
 <div class="page">
-
     <NavMenu />
 
     <main>
         <article class="content px-4">
-            <h1>Create</h1>
-
-            <h2>Appointment</h2>
+            <h1>Book Appointment</h1>
             <hr />
-            @* We use "AppointmentModel" here to avoid confusing the compiler *@
-            <EditForm method="post" Model="AppointmentModel" OnValidSubmit="AddAppointment" FormName="create" Enhance>
-                <DataAnnotationsValidator />
-                <ValidationSummary class="text-danger" role="alert" />
 
+            @if (isLoading)
+            {
+                <p><em>Loading...</em></p>
+            }
+            else if (shouldRedirect)
+            {
+                <p><em>Redirecting...</em></p>
+            }
+            else if (service == null)
+            {
+                <p class="text-danger">Service not found.</p>
+            }
+            else
+            {
                 <div class="mb-3">
-                    <label for="serviceproviderid" class="form-label">ServiceProviderId:</label>
-                    @* InputNumber handles int? correctly *@
-                    <InputNumber id="serviceproviderid" @bind-Value="AppointmentModel.ServiceProviderId" class="form-control" />
-                    <ValidationMessage For="() => AppointmentModel.ServiceProviderId" class="text-danger" />
+                    <h3>@service.Name</h3>
+                    <p>@service.Description</p>
+                    <p><strong>Price: @service.Price.ToString("C") / hour</strong></p>
                 </div>
 
-                <div class="mb-3">
-                    <span class="text-danger">*</span>
-                    <label for="customerid" class="form-label">CustomerId:</label>
-                    <InputNumber id="customerid" @bind-Value="AppointmentModel.CustomerId" class="form-control" aria-required="true" />
-                    <ValidationMessage For="() => AppointmentModel.CustomerId" class="text-danger" />
-                </div>
+                <EditForm Model="appointment" OnValidSubmit="CreateAsync" Enhance>
+                    <AntiforgeryToken />
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
 
-                <div class="mb-3">
-                    <span class="text-danger">*</span>
-                    <label for="serviceid" class="form-label">ServiceId:</label>
-                    <InputNumber id="serviceid" @bind-Value="AppointmentModel.ServiceId" class="form-control" aria-required="true" />
-                    <ValidationMessage For="() => AppointmentModel.ServiceId" class="text-danger" />
-                </div>
+                    @if (isReceptionist)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">Customer</label>
+                            <input type="text" class="form-control mb-2" placeholder="Type customer name..." @bind="customerSearchText" @oninput="OnCustomerSearchInput" />
+                            @if (filteredCustomers.Any())
+                            {
+                                <select class="form-select" size="5" @onchange="OnCustomerSelected">
+                                    <option value="">-- Select customer --</option>
+                                    @foreach (var c in filteredCustomers)
+                                    {
+                                        <option value="@c.Id">@c.FirstName @c.LastName (@c.Email)</option>
+                                    }
+                                </select>
+                            }
+                            @if (selectedCustomer != null)
+                            {
+                                <p class="mt-2"><strong>Selected:</strong> @selectedCustomer.FirstName @selectedCustomer.LastName</p>
+                            }
+                        </div>
+                    }
 
-                <div class="mb-3">
-                    <span class="text-danger">*</span>
-                    <label for="dateandtime" class="form-label">DateAndTime:</label>
-                    @* Type="datetime-local" allows picking both date and time *@
-                    <InputDate Type="InputDateType.DateTimeLocal" id="dateandtime" @bind-Value="AppointmentModel.DateAndTime" class="form-control" aria-required="true" />
-                    <ValidationMessage For="() => AppointmentModel.DateAndTime" class="text-danger" />
-                </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date and Time</label>
+                        <InputDate class="form-control" @bind-Value="appointment.DateAndTime" />
+                    </div>
 
-                <div class="mb-3">
-                    <span class="text-danger">*</span>
-                    <label for="status" class="form-label">Status:</label>
-                    @* CHANGED: Used InputSelect because Status is an Enum *@
-                    <InputSelect id="status" @bind-Value="AppointmentModel.Status" class="form-control" aria-required="true">
-                        @foreach (var status in Enum.GetValues(typeof(StatusType)))
-                        {
-                            <option value="@status">@status</option>
-                        }
-                    </InputSelect>
-                    <ValidationMessage For="() => AppointmentModel.Status" class="text-danger" />
-                </div>
-
-                <button type="submit" class="btn btn-primary">Create</button>
-            </EditForm>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" type="submit">Book Appointment</button>
+                        <button class="btn btn-secondary" type="button" @onclick="Cancel">Cancel</button>
+                    </div>
+                </EditForm>
+            }
         </article>
     </main>
-
 </div>
 
 @code {
-    [SupplyParameterFromForm]
-    private CS212FinalProject.Models.Appointment AppointmentModel { get; set; } = new();
+    [Parameter]
+    public int serviceId { get; set; }
+
+    private Service? service;
+    private Appointment appointment = new Appointment { DateAndTime = DateTime.Now.AddDays(1), Status = StatusType.Pending };
+    private bool isLoading = true;
+    private bool shouldRedirect = false;
+    private bool isReceptionist = false;
+    private int? currentUserId;
+
+    // Receptionist customer search
+    private string customerSearchText = string.Empty;
+    private List<User> allCustomers = new();
+    private List<User> filteredCustomers = new();
+    private User? selectedCustomer;
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = state.User;
 
-        if (!user.IsInRole(RoleType.Customer.ToString()))
+        if (!(user.Identity?.IsAuthenticated ?? false))
         {
-            NavigationManager.NavigateTo("/access-denied");
+            shouldRedirect = true;
+            isLoading = false;
             return;
         }
 
-        // Set a default date so the picker isn't blank/invalid
-        if (AppointmentModel.DateAndTime == default)
+        var role = user.FindFirst(ClaimTypes.Role)?.Value;
+        var idClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (int.TryParse(idClaim, out var uid))
+            currentUserId = uid;
+
+        // Only Customer or Receptionist can access
+        if (role != RoleType.Customer.ToString() && role != RoleType.Receptionist.ToString())
         {
-            AppointmentModel.DateAndTime = DateTime.Now;
+            shouldRedirect = true;
+            isLoading = false;
+            return;
+        }
+
+        isReceptionist = (role == RoleType.Receptionist.ToString());
+
+        service = await Db.Services.FindAsync(serviceId);
+        if (service == null)
+        {
+            isLoading = false;
+            return;
+        }
+
+        appointment.ServiceId = serviceId;
+        appointment.ServiceProviderId = null;
+        appointment.Status = StatusType.Pending;
+
+        if (isReceptionist)
+        {
+            // Load all customers for search
+            allCustomers = await Db.Users.Where(u => u.Role == RoleType.Customer).ToListAsync();
+        }
+        else
+        {
+            // Customer mode: set customer ID to current user
+            appointment.CustomerId = currentUserId ?? 0;
+        }
+
+        isLoading = false;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender && shouldRedirect)
+        {
+            NavigationManager.NavigateTo("/access-denied");
         }
     }
 
-    private async Task AddAppointment()
+    private void OnCustomerSearchInput(ChangeEventArgs e)
     {
-        using var context = DbFactory.CreateDbContext();
-        context.Appointments.Add(AppointmentModel);
-        await context.SaveChangesAsync();
+        customerSearchText = e.Value?.ToString() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(customerSearchText))
+        {
+            filteredCustomers.Clear();
+        }
+        else
+        {
+            var search = customerSearchText.ToLowerInvariant();
+            filteredCustomers = allCustomers
+                .Where(c => c.FirstName.ToLowerInvariant().Contains(search) || c.LastName.ToLowerInvariant().Contains(search) || c.Email.ToLowerInvariant().Contains(search))
+                .Take(10)
+                .ToList();
+        }
+    }
+
+    private void OnCustomerSelected(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var custId) && custId > 0)
+        {
+            selectedCustomer = allCustomers.FirstOrDefault(c => c.Id == custId);
+            appointment.CustomerId = custId;
+        }
+        else
+        {
+            selectedCustomer = null;
+            appointment.CustomerId = 0;
+        }
+    }
+
+    private async Task CreateAsync()
+    {
+        if (service == null) return;
+
+        // Validate customer set
+        if (appointment.CustomerId == 0)
+        {
+            // Optionally show error message
+            return;
+        }
+
+        // Ensure ServiceProviderId is null and Status is Pending
+        appointment.ServiceProviderId = null;
+        appointment.Status = StatusType.Pending;
+
+        Db.Appointments.Add(appointment);
+        await Db.SaveChangesAsync();
+
         NavigationManager.NavigateTo("/app");
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/app/service-page");
     }
 }

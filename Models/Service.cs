@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Permissions;
 
 namespace CS212FinalProject.Models
 {
@@ -19,6 +20,8 @@ namespace CS212FinalProject.Models
         [Required]
         [DataType(DataType.Currency)]
         [Column(TypeName = "decimal(18, 2)")]
+        [DisplayFormat(DataFormatString = "{0:C}")]
+        [Range(0, Int16.MaxValue)]
         public decimal Price { get; set; }
 
         [Required]

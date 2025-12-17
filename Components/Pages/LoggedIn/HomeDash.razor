@@ -8,7 +8,7 @@
 @inject IAuthService SignInService
 @inject CS212FinalProject.Data.CS212FinalProjectContext Db
 @inject NavigationManager NavigationManager
-
+@rendermode InteractiveServer
 
 <PageTitle>Home Dashboard</PageTitle>
 
@@ -140,6 +140,8 @@
                                     @foreach (var appt in managerAppointments)
                                     {
                                         <tr>
+                                            <EditForm method="post" Context="auth" Model="appt" OnValidSubmit="@(() => AssignProviderAsync(appt.Id))" FormName="assign" Enhance>
+                                            <AntiforgeryToken />
                                             <td>@appt.Service?.Name</td>
                                             <td>
                                                 <select class="form-select" @bind="selectedProvider[appt.Id]">
@@ -153,10 +155,11 @@
                                             <td>@appt.DateAndTime.ToString("g")</td>
                                             <td>@appt.Status.ToString()</td>
                                             <td>
-                                                <button class="btn btn-sm btn-primary" @onclick="() => AssignProviderAsync(appt.Id)" disabled="@assignInProgress.ContainsKey(appt.Id) && assignInProgress[appt.Id]">
+                                                <button class="btn btn-sm btn-primary" type="submit" disabled="@assignInProgress.ContainsKey(appt.Id) && assignInProgress[appt.Id]">
                                                     Save
                                                 </button>
                                             </td>
+                                            </EditForm>
                                         </tr>
                                     }
                                 </tbody>
@@ -184,6 +187,7 @@
     private string UserFullName = "Guest";
     private string UserRoleString = "None";
     private int? userId;
+    //private Appointment? AppointmentModel = new Appointment { Status = StatusType.Pending, ServiceProviderId = null };
 
     // Data
     private List<Appointment>? customerAppointments;
@@ -275,7 +279,8 @@
         serviceProviders = await Db.Users
             .Where(u => u.Role == RoleType.ServiceProvider)
             .ToListAsync();
-
+        
+        selectedProvider.Clear();
         // init provider selections
         foreach (var a in managerAppointments)
         {
@@ -311,7 +316,7 @@
     private async Task AssignProviderAsync(int appointmentId)
     {
         if (!selectedProvider.TryGetValue(appointmentId, out var providerId)) return;
-        if (providerId == null) return;
+        //if (providerId == null) return;
 
         assignInProgress[appointmentId] = true;
         var appt = await Db.Appointments.FindAsync(appointmentId);

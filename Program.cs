@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using CS212FinalProject.Data;
 using Shared.Services;
+using CS212FinalProject.Shared.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContextFactory<CS212FinalProjectContext>(options =>

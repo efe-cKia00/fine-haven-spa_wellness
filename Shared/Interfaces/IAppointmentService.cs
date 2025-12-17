@@ -1,7 +1,8 @@
 using System.Threading.Tasks;
 using CS212FinalProject.Models;
+using Shared.Services;
 
-namespace Shared.Services
+namespace CS212FinalProject.Shared.Interfaces
 {
     public interface IAppointmentService
     {
