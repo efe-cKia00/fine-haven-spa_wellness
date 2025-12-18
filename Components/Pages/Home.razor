@@ -13,83 +13,83 @@
 
 <div class="hp-body">
 
-<!-- Header -->
-<div class="hp-homepage hp-font-white">
-    <a href="/" class="hp-logo" aria-label="Home">
-        <img src="/logo.png" alt="Fine Haven Spa logo" />
-    </a>
+    <!-- Header -->
+    <div class="hp-homepage hp-font-white">
+        <a href="/" class="hp-logo" aria-label="Home">
+            <img src="/logo.png" alt="Fine Haven Spa logo" />
+        </a>
 
-    <a href="@($"/sign-in")" class="hp-signin-btn hp-signin" role="button">Sign In</a>
+        <a href="@($"/sign-in")" class="hp-signin-btn hp-signin" role="button">Sign In</a>
 
-    <div class="hp-homepage-content">
-        <h1>Fine Haven Spa and Wellness</h1>
-        <p>Worlds best spa</p>
-        <a class="mt-1 hp-link-white" href="#sneak-a-peek">View Services</a>
+        <div class="hp-homepage-content">
+            <h1>Fine Haven Spa and Wellness</h1>
+            <p>Worlds best spa</p>
+            <a class="mt-1 hp-link-white" href="#sneak-a-peek">View Services</a>
+        </div>
     </div>
-</div>
 
 
-<!-- Body -->
-<div class="hp-body container text-center hp-font-white mt-5">
+    <!-- Body -->
+    <div class="hp-body container text-center hp-font-white mt-5">
 
     
-    <div class="row text-center">
-        <h1>About Us</h1>
-        <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Repellat fugiat saepe tempora repudiandae sit repellendus quidem iure ipsum at quia ut molestiae officia similique illum excepturi modi soluta dolore dolor cum, blanditiis nemo debitis ipsa! Tenetur ratione, ipsum animi cumque perspiciatis corporis temporibus aliquid laborum maiores nam atque aut ab debitis illum. Quis, dolorem cum nisi quidem asperiores iure adipisci excepturi minus id a velit rerum quos, necessitatibus sequi laudantium sapiente at. Laudantium minima, dolorem ipsam beatae, qui natus possimus alias, quia officia vero voluptas odio consequuntur itaque culpa neque eaque fugiat quaerat? Quisquam asperiores placeat recusandae dolorem, iste quo!</p>
-        <a class="mt-1 d-grid gap-2 col-2 mx-auto hp-link-black" href="/about">Learn More</a>
-    </div>
+        <div class="row text-center">
+            <h1>About Us</h1>
+            <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Repellat fugiat saepe tempora repudiandae sit repellendus quidem iure ipsum at quia ut molestiae officia similique illum excepturi modi soluta dolore dolor cum, blanditiis nemo debitis ipsa! Tenetur ratione, ipsum animi cumque perspiciatis corporis temporibus aliquid laborum maiores nam atque aut ab debitis illum. Quis, dolorem cum nisi quidem asperiores iure adipisci excepturi minus id a velit rerum quos, necessitatibus sequi laudantium sapiente at. Laudantium minima, dolorem ipsam beatae, qui natus possimus alias, quia officia vero voluptas odio consequuntur itaque culpa neque eaque fugiat quaerat? Quisquam asperiores placeat recusandae dolorem, iste quo!</p>
+            <a class="mt-1 d-grid gap-2 col-2 mx-auto hp-link-black" href="/about">Learn More</a>
+        </div>
 
-    <div class="row mt-5">
-    <h2 id="sneak-a-peek" tabindex="-1">Sneak a Peek</h2>
-        <p>Explore some of our most valued services. All services are by appointment only. <i>Available at 30mins - 2 hours. All services are non-refundable.</i></p>
+        <div class="row mt-5">
+        <h2 id="sneak-a-peek" tabindex="-1">Sneak a Peek</h2>
+            <p>Explore some of our most valued services. All services are by appointment only. <i>Available at 30mins - 2 hours. All services are non-refundable.</i></p>
 
-    @foreach (var service in services)
-    {
-        <div class="col">
-            <div class="hp-body card">
-                <div class="card-body">
-                    <h5 class="card-title">@service.Name</h5>
-                    <p class="card-text">@service.Description</p>
-                    <a href="@("/sign-up")" class="card-link hp-link-black">Book Now</a>
+        @foreach (var service in services)
+        {
+            <div class="col">
+                <div class="hp-body card">
+                    <div class="card-body">
+                        <h5 class="card-title">@service.Name</h5>
+                        <p class="card-text">@service.Description</p>
+                        <a href="@("/sign-up")" class="card-link hp-link-black">Book Now</a>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
+        }
 
+        </div>
     </div>
-</div>
 
-<div class="row text-center mt-5 hp-location hp-font-white">
-        <div class="col mt-5">
-            <img src="/logo.png" alt="Fine Haven Spa logo" />
-            <p>1234 Street, Fargo, ND, 58102</p>
-            <p>Phone: (123) 456-7890</p>
-        </div>
-        <div class="col mt-5">
-            <h1>Hours</h1>
-            <p>Monday: 9AM - 5PM</p>
-            <p>Tuesday: 9AM - 5PM</p>
-            <p>Wednesday: 9AM - 5PM</p>
-            <p>Thursday: 9AM - 5PM</p>
-            <p>Friday: 9AM - 5PM</p>
-            <p>Saturday: 9AM - 5PM</p>
-            <p>Sunday: <i><b>CLOSED</b></i></p>
-        </div>
-        <div class="col m-5">
-            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2897.1234567890123!2d-79.3831843!3d43.653226!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89d4cb90d1f7c7f7%3A0x6789012345678901!2sExample+Location!5e0!3m2!1sen!2sus!4v1678886400000!5m2!1sen!2sus" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-        </div>
-</div>
+    <div class="row text-center mt-5 hp-location hp-font-white">
+            <div class="col mt-5">
+                <img src="/logo.png" alt="Fine Haven Spa logo" />
+                <p>1234 Street, Fargo, ND, 58102</p>
+                <p>Phone: (123) 456-7890</p>
+            </div>
+            <div class="col mt-5">
+                <h1>Hours</h1>
+                <p>Monday: 9AM - 5PM</p>
+                <p>Tuesday: 9AM - 5PM</p>
+                <p>Wednesday: 9AM - 5PM</p>
+                <p>Thursday: 9AM - 5PM</p>
+                <p>Friday: 9AM - 5PM</p>
+                <p>Saturday: 9AM - 5PM</p>
+                <p>Sunday: <i><b>CLOSED</b></i></p>
+            </div>
+            <div class="col m-5">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2897.1234567890123!2d-79.3831843!3d43.653226!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89d4cb90d1f7c7f7%3A0x6789012345678901!2sExample+Location!5e0!3m2!1sen!2sus!4v1678886400000!5m2!1sen!2sus" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+    </div>
 
 
-<!-- Footer -->
-<div class="row hp-footer hp-font-black" style="color: #F6EEE5">
-    <p class="text-center">&copy; 2025 Fine Haven Spa and Wellness - All Rights Reserved</p>
-    <p class="text-center">
-        <a href="https://www.instagram.com" target="_blank"><img class="hp-ico" src="/ig_ico.png" alt="Fine Haven Spa logo" /></a> |
-            <a href="https://www.pinterest.com" target="_blank"><img class="hp-ico" src="/pin_ico.png" alt="Fine Haven Spa logo" /></a> |
-            <a href="https://www.x.com" target="_blank"><img class="hp-ico" src="/x_ico.png" alt="Fine Haven Spa logo" /></a>
-    </p>
-</div>
+    <!-- Footer -->
+    <div class="row hp-footer hp-font-black" style="color: #F6EEE5">
+        <p class="text-center">&copy; 2025 Fine Haven Spa and Wellness - All Rights Reserved</p>
+        <p class="text-center">
+            <a href="https://www.instagram.com" target="_blank"><img class="hp-ico" src="/ig_ico.png" alt="Fine Haven Spa logo" /></a> |
+                <a href="https://www.pinterest.com" target="_blank"><img class="hp-ico" src="/pin_ico.png" alt="Fine Haven Spa logo" /></a> |
+                <a href="https://www.x.com" target="_blank"><img class="hp-ico" src="/x_ico.png" alt="Fine Haven Spa logo" /></a>
+        </p>
+    </div>
 
 </div>
 

@@ -62,7 +62,7 @@ namespace Shared.Services
                 }
             }
 
-            // Service must exist (optionally require IsAvailable)
+            // Service must exist
             var service = await db.Services.FindAsync(appointment.ServiceId);
             if (service == null)
             {

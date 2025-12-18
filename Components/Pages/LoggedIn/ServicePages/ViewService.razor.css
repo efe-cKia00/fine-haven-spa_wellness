@@ -1,0 +1,18 @@
+﻿.service-card {
+    background-color: #7a5c47b6;
+    transition: transform 0.1s ease-in-out;
+}
+
+    .service-card:hover {
+        transform: scale(1.05);
+    }
+
+.book-button {
+    background-color: #6640218f;
+    padding: 15px 30px;
+    font-size: 30px;
+    font-weight: bold;
+    width: 100%;
+    display: block;
+    text-align: center;
+}

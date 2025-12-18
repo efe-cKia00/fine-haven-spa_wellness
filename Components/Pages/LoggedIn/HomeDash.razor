@@ -12,7 +12,6 @@
 
 <PageTitle>Home Dashboard</PageTitle>
 
-
 <div class="page">
     
     <NavMenu />
@@ -100,7 +99,7 @@
                                                 </select>
                                             </td>
                                             <td>
-                                                <button class="btn btn-sm btn-primary" @onclick="() => SaveStatusAsync(appt.Id)" disabled="@saveInProgress.ContainsKey(appt.Id) && saveInProgress[appt.Id]">
+                                                <button class="btn btn-sm btn-primary" @onclick="() => SaveStatusAsync(appt.Id)" disabled="@(saveInProgress.ContainsKey(appt.Id) && saveInProgress[appt.Id])">
                                                     Save
                                                 </button>
                                             </td>
@@ -140,8 +139,6 @@
                                     @foreach (var appt in managerAppointments)
                                     {
                                         <tr>
-                                            <EditForm method="post" Context="auth" Model="appt" OnValidSubmit="@(() => AssignProviderAsync(appt.Id))" FormName="assign" Enhance>
-                                            <AntiforgeryToken />
                                             <td>@appt.Service?.Name</td>
                                             <td>
                                                 <select class="form-select" @bind="selectedProvider[appt.Id]">
@@ -155,11 +152,10 @@
                                             <td>@appt.DateAndTime.ToString("g")</td>
                                             <td>@appt.Status.ToString()</td>
                                             <td>
-                                                <button class="btn btn-sm btn-primary" type="submit" disabled="@assignInProgress.ContainsKey(appt.Id) && assignInProgress[appt.Id]">
+                                                <button class="btn btn-sm btn-primary" @onclick="() => AssignProviderAsync(appt.Id)" disabled="@(assignInProgress.ContainsKey(appt.Id) && assignInProgress[appt.Id])">
                                                     Save
                                                 </button>
                                             </td>
-                                            </EditForm>
                                         </tr>
                                     }
                                 </tbody>
@@ -185,7 +181,7 @@
 
 @code {
     private string UserFullName = "Guest";
-    private string UserRoleString = "None";
+    private string? UserRoleString = null;
     private int? userId;
     //private Appointment? AppointmentModel = new Appointment { Status = StatusType.Pending, ServiceProviderId = null };
 

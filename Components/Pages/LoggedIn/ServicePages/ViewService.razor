@@ -14,7 +14,7 @@
 <PageTitle>Available Services</PageTitle>
 
 <div class="page">
-    
+
     <NavMenu />
 
     <main>
@@ -29,10 +29,10 @@
                 {
                     <AuthorizeView Context="authManager" Roles="Manager">
                         <div class="col-sm-2 mb-3">
-                            <div class="card">
+                            <div class="card service-card">
                                 <div class="card-body">
-                                    <h2 class="card-title">@service.Name</h2>
-                                    <p class="card-body">@service.Description</p>
+                                    <h2 class="card-title service-title">@service.Name</h2>
+                                    <p class="card-body service-body">@service.Description</p>
                                     <p><strong>@service.Price.ToString("C")</strong></p>
                                     <div class="col-2">
                                         <a class="btn btn-primary me-2" href="@($"/app/service/edit/{service.Id}")">Edit</a>
@@ -48,15 +48,20 @@
                     <AuthorizeView Roles="Customer, Receptionist">
                         @if (service.IsAvailable)
                         {
-                            <div class="col-sm-2 mb-3">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h2 class="card-title">@service.Name</h2>
-                                        <p class="card-body">@service.Description</p>
-                                        <p><strong>@service.Price.ToString("C")</strong></p>
-                                        <a class="btn btn-primary" href="@($"/app/appointment/create/{service.Id}")">Book</a>
+                            <div class="col-sm-4 mb-3">
+                                <a href="@($"/app/appointment/create/{service.Id}")" class="text-decoration-none text-reset">
+
+                                    <div class="card service-card">
+                                        <div class="card-body">
+                                            <h2 class="card-title"><strong>@service.Name</strong></h2>
+                                            <p class="card-text">@service.Description</p>
+                                            <p><strong>@service.Price.ToString("C")</strong></p>
+
+                                            <span class="btn book-button">Book Appointment</span>
+                                        </div>
                                     </div>
-                                </div>
+
+                                </a>
                             </div>
                         }
                     </AuthorizeView>

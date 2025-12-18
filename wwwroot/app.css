@@ -1,5 +1,6 @@
-html {
+html, body {
     scroll-behavior: smooth;
+    
 }
 
 h1:focus {

@@ -5,58 +5,132 @@
 @using Microsoft.EntityFrameworkCore
 @using CS212FinalProject.Models
 @inject AuthenticationStateProvider AuthStateProvider
-@inject IAuthService SignInService
-@inject IDbContextFactory<CS212FinalProject.Data.CS212FinalProjectContext> DbFactory
+@inject CS212FinalProject.Data.CS212FinalProjectContext Db
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
-<PageTitle>Home Dashboard</PageTitle>
+<PageTitle>My Account</PageTitle>
 
 <div class="page">
-    
     <NavMenu />
 
     <main>
-        <article class="content px-4">
+        <article class="content px-4"> 
             <AuthorizeView Roles="Customer">
-                <Authorized>
-                    <h3>Welcome, Manager!</h3>
-                </Authorized>
-            </AuthorizeView>
+                    <Authorized>
+                        <h3>Edit Your Profile</h3>
+                        @if (currentUser != null)
+                        {
+                            <EditForm Context="Db" Model="currentUser" OnValidSubmit="HandleUpdateProfileAsync">
+                                <DataAnnotationsValidator />
+                                <ValidationSummary />
 
-            <AuthorizeView Roles="Manager">
-                <Authorized>
-                    <h3>Welcome, Manager!</h3>
-                </Authorized>
-            </AuthorizeView>
+                                <div class="mb-3">
+                                    <label for="firstName" class="form-label">First Name</label>
+                                    <InputText id="firstName" class="form-control" @bind-Value="currentUser.FirstName" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="lastName" class="form-label">Last Name</label>
+                                    <InputText id="lastName" class="form-control" @bind-Value="currentUser.LastName" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Phone Number</label>
+                                    <InputText id="phone" class="form-control" @bind-Value="currentUser.PhoneNumber" />
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                            </EditForm>
+                        }
+                        else
+                        {
+                            <p><em>Loading your profile...</em></p>
+                        }
+                    </Authorized>
+                </AuthorizeView>
+
+                <AuthorizeView Roles="Manager">
+                    <Authorized>
+                        <h3>Manage Users</h3>
+                        @if (userList == null)
+                        {
+                            <p><em>Loading users...</em></p>
+                        }
+                        else
+                        {
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var user in userList)
+                                    {
+                                        <tr>
+                                            <td>@user.FirstName</td>
+                                            <td>@user.LastName</td>
+                                            <td>@user.Email</td>
+                                            <td>@user.Role.ToString()</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-secondary" @onclick="() => EditUser(user.Id)">
+                                                    Edit
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </Authorized>
+                </AuthorizeView>
         </article>
     </main>
-
 </div>
 
 @code {
-    [SupplyParameterFromForm]
-    private User User { get; set; } = default!;
+    private User? currentUser;
+    private List<User>? userList;
+    private int? currentUserId;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        if (user?.Identity == null || !user.Identity.IsAuthenticated || !user.IsInRole("Manager") || !user.IsInRole("Customer"))
+        if (user.Identity?.IsAuthenticated ?? false)
         {
-            NavigationManager.NavigateTo("/access-denied");
-            return;
-        }
+            currentUserId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userRole = user.FindFirstValue(ClaimTypes.Role);
 
-        User ??= new();
+            if (userRole == RoleType.Customer.ToString())
+            {
+                currentUser = await Db.Users.FindAsync(currentUserId);
+            }
+            else if (userRole == RoleType.Manager.ToString())
+            {
+                userList = await Db.Users
+                    .Where(u => u.Role != RoleType.Customer)
+                    .ToListAsync();
+            }
+        }
     }
 
-    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
-    private async Task AddUser()
+    private async Task HandleUpdateProfileAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-        context.Users.Add(User);
-        await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/users");
+        if (currentUser != null)
+        {
+            Db.Users.Update(currentUser);
+            await Db.SaveChangesAsync();
+            // Optionally, add a success message
+        }
+    }
+
+    private void EditUser(int userId)
+    {
+        NavigationManager.NavigateTo($"/app/edit-user/{userId}");
     }
 }

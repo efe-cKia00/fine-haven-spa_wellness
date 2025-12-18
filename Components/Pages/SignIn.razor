@@ -1,53 +1,51 @@
 ﻿@page "/sign-in"
+@using System.ComponentModel.DataAnnotations
 @inject NavigationManager NavigationManager
 @inject IAuthService SignInService
-
-@using System.ComponentModel.DataAnnotations
-
+@rendermode InteractiveServer
 
 <PageTitle>Sign In</PageTitle>
 
 <div class="hp-signin-page">
-  <div class="hp-signin-container">
-    <h2 class="mb-3">Sign In</h2>
+    <div class="hp-signin-container">
+        <h2 class="mb-3">Sign In</h2>
 
-    @if (!string.IsNullOrEmpty(Message))
-    {
-      <div class="alert alert-danger" role="alert">@Message</div>
-    }
+        @if (!string.IsNullOrEmpty(Message))
+        {
+        <div class="alert alert-danger" role="alert">@Message</div>
+        }
 
-    <EditForm Model="@Model" OnValidSubmit="HandleValidSubmit" FormName="SignInForm">
-      <DataAnnotationsValidator />
-      <ValidationSummary class="text-danger" />
+        <EditForm Model="@Model" OnValidSubmit="HandleValidSubmit" FormName="SignInForm">
+            <DataAnnotationsValidator />
 
-      <div class="mb-3">
-        <label for="email" class="form-label">Email</label>
-        <InputText id="email" class="form-control" @bind-Value="Model.Email" />
-        <ValidationMessage For="@(() => Model.Email)" class="text-danger" />
-      </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <InputText id="email" class="form-control" @bind-Value="Model.Email" />
+                <ValidationMessage For="@(() => Model.Email)" class="text-danger" />
+            </div>
 
-      <div class="mb-3">
-        <label for="password" class="form-label">Password</label>
-        <div class="input-group">
-            <InputText id="password" type="@(showPassword ? "text" : "password")" class="form-control" @bind-Value="Model.Password" />
-            <span class="input-group-text">
-                <input type="checkbox" @bind="showPassword" aria-label="Show password" /> Show
-            </span>
-        </div>    
-        <ValidationMessage For="@(() => Model.Password)" class="text-danger" />
-    </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-group">
+                    <InputText id="password" type="@(showPassword ? "text" : "password")" class="form-control" @bind-Value="Model.Password" />
+                    <span class="input-group-text">
+                        <input type="checkbox" @bind="showPassword" aria-label="Show password" /> Show
+                    </span>
+                </div>    
+                <ValidationMessage For="@(() => Model.Password)" class="text-danger" />
+            </div>
 
-      <div class="mb-3">
+            <div class="mb-3">
                 <p>Don't have an account? <a href="@($"/sign-up")" class="">Create account</a></p>
-      </div>
+            </div>
 
-      <div class="d-flex justify-content-between align-items-center">
-        <button class="hp-link-black" type="submit" disabled="@isSubmitting">
-          @(isSubmitting ? "Signing in..." : "Sign in")
-        </button>
-      </div>
-    </EditForm>
-  </div>
+            <div class="d-flex justify-content-between align-items-center">
+                <button class="hp-link-black" type="submit" disabled="@isSubmitting">
+                    @(isSubmitting ? "Signing in..." : "Sign in")
+                </button>
+            </div>
+        </EditForm>
+    </div>
 </div>
 
 @code {
@@ -62,12 +60,11 @@
         isSubmitting = true;
         Message = null;
 
-        // Simulate a sign-in process
+        // Simulate a sign-in process and store the outcome as a boolean value
         var result = await SignInService.SignInAsync(Model.Email!, Model.Password!);
 
         if (result)
         {
-            // TODO: Navigate to the appropriate page after successful sign-in
             NavigationManager.NavigateTo("/app");
         }
         else
@@ -85,7 +82,7 @@
         public string? Email { get; set; }
 
         [Required]
-        [MinLength(6)]
+        [MinLength(6, ErrorMessage = "Password must be at least 6 characters long"), MaxLength(127, ErrorMessage = "Password must be at most 127 characters long")]
         public string? Password { get; set; }
     }
 }

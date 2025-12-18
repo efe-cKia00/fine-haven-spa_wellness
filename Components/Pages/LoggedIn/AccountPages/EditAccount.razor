@@ -1,0 +1,102 @@
+@page "/app/edit-user/{UserId:int}"
+@using CS212FinalProject.Components.Layout
+@using Microsoft.EntityFrameworkCore
+@using CS212FinalProject.Models
+@using Microsoft.AspNetCore.Components.Authorization
+@inject CS212FinalProject.Data.CS212FinalProjectContext Db
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Edit User</PageTitle>
+
+<div class="page">
+    <NavMenu />
+
+    <main>
+        <article class="content px-4"> 
+            @if (isAuthorized)
+            {
+                <h3>Edit User Profile</h3>
+
+                @if (userToEdit != null)
+                {
+                    <EditForm Model="userToEdit" OnValidSubmit="HandleUserUpdateAsync">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mb-3">
+                            <label class="form-label">First Name</label>
+                            <InputText class="form-control" @bind-Value="userToEdit.FirstName" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Last Name</label>
+                            <InputText class="form-control" @bind-Value="userToEdit.LastName" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <InputText class="form-control" @bind-Value="userToEdit.Email" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <InputText class="form-control" @bind-Value="userToEdit.PhoneNumber" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Role</label>
+                            <InputSelect class="form-select" @bind-Value="userToEdit.Role">
+                                @foreach (var role in Enum.GetValues(typeof(RoleType)))
+                                {
+                                    if ((RoleType)role != RoleType.Customer)
+                                    {
+                                        <option value="@role">@role.ToString()</option>
+                                    }
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="/app/account" class="btn btn-link">Cancel</a>
+                    </EditForm>
+                }
+                else
+                {
+                    <p><em>Loading user details...</em></p>
+                }
+            }
+</article>
+    </main>
+</div>
+
+@code {
+    [Parameter]
+    public int UserId { get; set; }
+
+    private User? userToEdit;
+    private bool isAuthorized = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true && user.IsInRole("Manager"))
+        {
+            isAuthorized = true;
+            userToEdit = await Db.Users.FindAsync(UserId);
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/access-denied");
+        }
+    }
+
+    private async Task HandleUserUpdateAsync()
+    {
+        if (userToEdit != null)
+        {
+            Db.Users.Update(userToEdit);
+            await Db.SaveChangesAsync();
+            NavigationManager.NavigateTo("/app/account");
+        }
+    }
+}
