@@ -51,6 +51,8 @@
                 <AuthorizeView Roles="Manager">
                     <Authorized>
                         <h3>Manage Users</h3>
+                        <hr />
+                        <a class="btn btn-primary my-3" href="@("/app/create-account")">Create An Employee</a> 
                         @if (userList == null)
                         {
                             <p><em>Loading users...</em></p>

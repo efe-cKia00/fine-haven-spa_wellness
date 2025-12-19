@@ -44,6 +44,32 @@ namespace Shared.Services
             return true;
         }
 
+        public async Task<bool> CreateManagerAccountAsync(string firstName, string lastName, string email, string phoneNumber, string role, string password) // RoleType is enum, need to specify which role to assign to this account (customer, manager, admin, etc. - can be changed in the future for more roles) and ac string password)
+        {
+            email = (email ?? string.Empty).Trim().ToLowerInvariant();
+
+            using var db = _dbFactory.CreateDbContext();
+            if (await db.Users.AnyAsync(u => u.Email == email))
+                return false;
+
+            // Parse the role string to RoleType enum
+            if (!Enum.TryParse<RoleType>(role, out var parsedRole))
+                parsedRole = RoleType.ServiceProvider; // or handle invalid role as needed
+
+            var user = new User
+            {
+                FirstName = firstName ?? string.Empty,
+                LastName = lastName ?? string.Empty,
+                Email = email,
+                PhoneNumber = phoneNumber ?? string.Empty,
+                Role = parsedRole,
+                PasswordHash = PasswordHasher.Hash(password ?? string.Empty)
+            };
+
+            db.Users.Add(user);
+            await db.SaveChangesAsync();
+            return true;
+        }
         public async Task<bool> SignInAsync(string email, string password)
         {
             email = (email ?? string.Empty).Trim().ToLowerInvariant();

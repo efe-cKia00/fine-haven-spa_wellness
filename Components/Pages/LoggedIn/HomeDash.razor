@@ -62,7 +62,7 @@
                 <!-- Receptionist view -->
                 <AuthorizeView Roles="Receptionist">
                     <Authorized>
-                        <h3 class="mt-4">Pending appointments (assigned to providers)</h3>
+                        <h3 class="mt-4">Assigned appointments</h3>
                         @if (receptionistAppointments is null)
                         {
                             <p><em>Loading...</em></p>
@@ -141,7 +141,7 @@
                                         <tr>
                                             <td>@appt.Service?.Name</td>
                                             <td>
-                                                <select class="form-select" @bind="selectedProvider[appt.Id]">
+                                                <select class="form-select" @bind="selectedServiceProvider[appt.Id]">
                                                     <option value="">-- choose provider --</option>
                                                     @foreach (var sp in serviceProviders)
                                                     {
@@ -152,7 +152,7 @@
                                             <td>@appt.DateAndTime.ToString("g")</td>
                                             <td>@appt.Status.ToString()</td>
                                             <td>
-                                                <button class="btn btn-sm btn-primary" @onclick="() => AssignProviderAsync(appt.Id)" disabled="@(assignInProgress.ContainsKey(appt.Id) && assignInProgress[appt.Id])">
+                                                <button class="btn btn-sm btn-primary" @onclick="() => AssignServiceProviderAsync(appt.Id)" disabled="@(assignInProgress.ContainsKey(appt.Id) && assignInProgress[appt.Id])">
                                                     Save
                                                 </button>
                                             </td>
@@ -168,15 +168,55 @@
                 <AuthorizeView Roles="ServiceProvider">
                     <Authorized>
                         <h3 class="mt-4">Provider dashboard</h3>
-                        <p>Provider-specific UI can go here (e.g., your assigned appointments).</p>
+                        @if (serviceProviderAppointments is null)
+                        {
+                            <p><em>Loading...</em></p>
+                        }
+                        else if (!serviceProviderAppointments.Any())
+                        {
+                            <p>Relax for now. You have no assigned appointments.</p>
+                        }
+                        else
+                        {
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Service</th>
+                                        <th>Custmer</th>
+                                        <th>Date and time</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var appt in serviceProviderAppointments!)
+                                    {
+                                        <tr>
+                                            <td>@appt.Service?.Name</td>
+                                            <td>@($"{appt.Customer?.FirstName} {appt.Customer?.LastName}")</td>
+                                            <td>@appt.DateAndTime.ToString("g")</td>
+                                            <td>
+                                                <select class="form-select" @bind="selectedStatus[appt.Id]">
+                                                    @foreach (var s in statusOptions)
+                                                    {
+                                                        <option value="@s">@s</option>
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary" @onclick="() => SaveStatusAsync(appt.Id)" disabled="@(saveInProgress.ContainsKey(appt.Id) && saveInProgress[appt.Id])">
+                                                    Save
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
                     </Authorized>
                 </AuthorizeView>
             </div>
         </article>
     </main>
-
-
-
 </div>
 
 @code {
@@ -189,12 +229,13 @@
     private List<Appointment>? customerAppointments;
     private List<Appointment>? receptionistAppointments;
     private List<Appointment>? managerAppointments;
+    private List<Appointment>? serviceProviderAppointments;
     private List<User>? serviceProviders;
 
     // status choices and per-row selection
     private readonly List<string> statusOptions = Enum.GetNames(typeof(StatusType)).ToList();
     private readonly Dictionary<int, string> selectedStatus = new();
-    private readonly Dictionary<int, int?> selectedProvider = new();
+    private readonly Dictionary<int, int?> selectedServiceProvider = new();
 
     // track per-row saves
     private readonly Dictionary<int, bool> saveInProgress = new();
@@ -232,7 +273,7 @@
             }
             else if (roleClaim == RoleType.ServiceProvider.ToString())
             {
-                await LoadProviderDataAsync();
+                await LoadServiceProviderDataAsync();
             }
         }
         else
@@ -276,19 +317,26 @@
             .Where(u => u.Role == RoleType.ServiceProvider)
             .ToListAsync();
         
-        selectedProvider.Clear();
         // init provider selections
         foreach (var a in managerAppointments)
         {
-            selectedProvider[a.Id] = a.ServiceProviderId;
+            selectedServiceProvider[a.Id] = a.ServiceProviderId;
         }
     }
 
-    private async Task LoadProviderDataAsync()
+    private async Task LoadServiceProviderDataAsync()
     {
-        // Placeholder: load provider-specific data if desired
-        // e.g., assigned appointments
-        await Task.CompletedTask;
+        serviceProviderAppointments = await Db.Appointments
+            .Include(a => a.Service)
+            .Include(a => a.Customer)
+            .Where(a => a.ServiceProviderId == userId && a.Status != StatusType.Completed && a.Status != StatusType.Canceled)
+            .ToListAsync();
+
+        // init selection with current status
+        foreach (var a in serviceProviderAppointments)
+        {
+            selectedStatus[a.Id] = a.Status.ToString();
+        }
     }
 
     private async Task SaveStatusAsync(int appointmentId)
@@ -309,9 +357,9 @@
         saveInProgress[appointmentId] = false;
     }
 
-    private async Task AssignProviderAsync(int appointmentId)
+    private async Task AssignServiceProviderAsync(int appointmentId)
     {
-        if (!selectedProvider.TryGetValue(appointmentId, out var providerId)) return;
+        if (!selectedServiceProvider.TryGetValue(appointmentId, out var providerId)) return;
         //if (providerId == null) return;
 
         assignInProgress[appointmentId] = true;
