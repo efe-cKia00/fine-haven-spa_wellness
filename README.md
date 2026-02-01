@@ -78,7 +78,7 @@ appsettings.json      # Configuration files
 - [Efe Awo-Osagie](https://www.linkedin.com/in/efe-awo-osagie-b4b796381/)
 - [Jack Losing](https://www.linkedin.com/in/jlosing/)
 - [Jesse Dahlke](jesse.dahlke@ndsu.edu)
-- [Timmothy Middleton](timothy.middleton@ndsu.edu)
+- [Timothy Middleton](timothy.middleton@ndsu.edu)
 
 ## License
 This project is for educational purposes. See your institution's guidelines for code sharing and reuse.
